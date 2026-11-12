@@ -339,5 +339,58 @@ export function upcomingFeasts(dt, days = 10) {
 
 export const RANK_DOT = { Solemnity: "#b45309", Sunday: "#b45309", Feast: "#0095f6", Observance: "#8b5cf6", Memorial: "#16a34a", Optional: "#9ca3af" };
 
+// ---------- feast search: next upcoming occurrence of every match ----------
+function normQ(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+}
+export function searchFeasts(q, today = new Date()) {
+  const tokens = normQ(q).split(" ").filter(Boolean);
+  if (!tokens.length) return [];
+  const t = toDate(parts(today).y, parts(today).m, parts(today).d);
+  const cands = new Map(); // name -> {name, rank, about, obligation, y, m, d}
+  const consider = (f) => {
+    const hay = normQ(f.name + " " + (f.about || ""));
+    if (!tokens.every((tk) => hay.includes(tk))) return;
+    const prev = cands.get(f.name);
+    const cur = prev ? toDate(prev.y, prev.m, prev.d) : null;
+    const dt = toDate(f.y, f.m, f.d);
+    if (dt.getTime() >= t.getTime() && (!cur || dt.getTime() < cur.getTime())) {
+      cands.set(f.name, { name: f.name, rank: f.rank, about: f.about, obligation: !!f.obligation, y: f.y, m: f.m, d: f.d });
+    }
+  };
+  const y0 = t.getFullYear();
+  for (const f of FIXED) {
+    consider({ ...f, y: y0 });
+    consider({ ...f, y: y0 + 1 });
+  }
+  for (const f of [...movableFeasts(y0), ...movableFeasts(y0 + 1)]) consider(f);
+  return [...cands.values()]
+    .sort((a, b) => toDate(a.y, a.m, a.d) - toDate(b.y, b.m, b.d))
+    .slice(0, 20);
+}
+
+// ---------- Sunday Mass log: count + streak ----------
+export function sundayOnOrBefore(dt) {
+  const { y, m, d } = parts(dt);
+  const c = toDate(y, m, d);
+  while (c.getDay() !== 0) c.setDate(c.getDate() - 1);
+  return c;
+}
+export function massStats(logKeys, today = new Date()) {
+  const set = new Set(logKeys || []);
+  const last = sundayOnOrBefore(today);
+  const lp = parts(last);
+  const logged = set.has(key(lp.y, lp.m, lp.d));
+  let streak = 0;
+  let cursor = logged ? last : addDays(last, -7);
+  for (let i = 0; i < 520; i++) {
+    const cp = parts(cursor);
+    if (!set.has(key(cp.y, cp.m, cp.d))) break;
+    streak++;
+    cursor = addDays(cursor, -7);
+  }
+  return { total: set.size, streak, logged, lastSunday: lp };
+}
+
 
 

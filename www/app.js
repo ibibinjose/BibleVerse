@@ -79,7 +79,7 @@ export const VERSES = [...RAW, ...RAW2, ...RAW3].map((r,i)=>{ const [author, han
 import { initBible } from "./bible.js";
 import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
 import { createPullRefresh } from "./pull-refresh.js";
-import { feastsOn, upcomingFeasts, seasonOf, toDate, RANK_DOT } from "./feasts.js";
+import { feastsOn, upcomingFeasts, seasonOf, toDate, RANK_DOT, searchFeasts, massStats, key as feastKey } from "./feasts.js";
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
 let activeTopic = "All", reelIndex = 0, order = [...VERSES], reelPool = [...VERSES];
@@ -236,6 +236,7 @@ function renderFeasts(){
   const season = seasonOf(now), todayList = feastsOn(now);
   $("#feastToday").innerHTML = `<div class="season-card" style="--season:${season.color}"><small>${esc(season.name)} · Today</small><b>${todayList.length ? esc(todayList.map(f=>f.name).join(" · ")) : "An Ordinary weekday"}</b><span>${todayList.length && todayList[0].about ? esc(todayList[0].about) : esc(SEASON_LINE[season.name] || "")}</span></div>`;
   $("#tabFeastDot").hidden = !todayList.some(f=>f.obligation);
+  renderMass(now);
   $("#calTitle").textContent = `${MONTHS[calM-1]} ${calY}`;
   const first = new Date(calY, calM-1, 1).getDay(), dim = new Date(calY, calM, 0).getDate();
   const tY = now.getFullYear(), tM = now.getMonth()+1, tD = now.getDate();
@@ -266,6 +267,47 @@ function renderFeasts(){
     $("#scrollArea").scrollTo({ top: 0, behavior: "smooth" });
   }));
 }
+function massLog(){
+  try { const v = JSON.parse(localStorage.getItem("bibleverse-mass")||"[]"); return Array.isArray(v) ? v : []; }
+  catch { return []; }
+}
+function renderMass(now){
+  const stats = massStats(massLog(), now);
+  const sun = stats.lastSunday;
+  const sunDate = toDate(sun.y, sun.m, sun.d);
+  const sunLabel = `${WEEKDAYS[sunDate.getDay()]}, ${MONTHS[sun.m-1]} ${sun.d}`;
+  const daysUntil = (7 - now.getDay()) % 7;
+  const nextLabel = daysUntil === 0 ? (stats.logged ? "See you next Sunday" : "Today") : `in ${daysUntil} day${daysUntil>1?"s":""}`;
+  const sub = stats.total === 0
+    ? `Sundays kept holy · Last: ${sunLabel} · Next: ${nextLabel}`
+    : `${stats.total} Sunday${stats.total>1?"s":""} kept · ${stats.streak}-week streak · Next: ${nextLabel}`;
+  $("#massCard").innerHTML = `<div class="mass-card${stats.logged?" logged":""}"><span class="mass-count">${stats.total}</span><span class="mass-main"><b>Sunday Mass</b><span>${esc(sub)}</span></span>${stats.logged?`<span class="mass-done">✓</span>`:`<button class="ig-btn" id="massLogBtn">I went</button>`}</div>`;
+  $("#massLogBtn")?.addEventListener("click",()=>{
+    const log = massLog();
+    const k = feastKey(sun.y, sun.m, sun.d);
+    if(!log.includes(k)) log.push(k);
+    persist("bibleverse-mass", log);
+    renderMass(new Date());
+    showToast("Sunday Mass logged ✓");
+  });
+}
+function renderFeastSearch(){
+  const q = $("#feastSearch").value || "";
+  const box = $("#feastSearchResults");
+  if(!q.trim()){ box.innerHTML = ""; return; }
+  const hits = searchFeasts(q, new Date());
+  if(!hits.length){ box.innerHTML = `<p class="view-sub">No feasts or saints match “${esc(q.trim())}”. Try fewer words.</p>`; return; }
+  const now = new Date();
+  box.innerHTML = hits.map(h=>{
+    const dd = Math.round((toDate(h.y,h.m,h.d) - now) / 864e5);
+    const when = dd <= 0 ? "Today" : (dd === 1 ? "Tomorrow" : `in ${dd} days`);
+    return `<button class="up-row" data-fjump="${h.y}-${h.m}-${h.d}"><span class="up-date"><b>${h.d}</b><span>${MON_ABBR[h.m-1]}${h.y!==now.getFullYear()?" "+String(h.y).slice(2):""}</span></span><span class="up-main">${esc(h.name)}<small>${esc(h.rank)}${h.obligation?" · ✦ Holy Day of Obligation":""}</small></span><span class="up-when${dd<=7?" soon":""}">${when}</span></button>`;
+  }).join("");
+  box.querySelectorAll("[data-fjump]").forEach(b=>b.addEventListener("click",()=>{
+    const [y,m,d] = b.dataset.fjump.split("-").map(Number);
+    calY = y; calM = m; calSel = { y, m, d }; renderFeasts();
+  }));
+}
 function switchView(name){
   document.querySelectorAll(".view").forEach(v=>v.hidden = v.id !== "view-"+name);
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===name));
@@ -276,6 +318,7 @@ function switchView(name){
 }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
 $("#searchInput").addEventListener("input", renderDiscover);
+$("#feastSearch").addEventListener("input", renderFeastSearch);
 $("#clearFilterBtn").addEventListener("click",()=>{ activeTopic="All"; renderStories(); renderAll(); });
 $("#calPrevBtn").addEventListener("click",()=>{ calM--; if(calM<1){ calM=12; calY--; } renderFeasts(); });
 $("#calNextBtn").addEventListener("click",()=>{ calM++; if(calM>12){ calM=1; calY++; } renderFeasts(); });

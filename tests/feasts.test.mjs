@@ -2,8 +2,8 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   FIXED, RANK_DOT, adventSunday, baptismOfLord, christTheKing, easterSunday,
-  epiphanySunday, feastsOn, holyFamily, movableFeasts, seasonOf, toDate,
-  upcomingFeasts,
+  epiphanySunday, feastsOn, holyFamily, key, massStats, movableFeasts,
+  searchFeasts, seasonOf, sundayOnOrBefore, toDate, upcomingFeasts,
 } from "../feasts.js";
 
 const D = (y, m, d) => toDate(y, m, d);
@@ -69,6 +69,46 @@ describe("feasts", () => {
     assert.ok(up.length === 5);
     assert.ok(up.every((g, i, a) => i === 0 || a[i - 1].inDays < g.inDays));
     assert.ok(up[0].inDays >= 1 && up[0].items.length > 0);
+  });
+
+  it("searches feasts and saints with next occurrences", () => {
+    const patrick = searchFeasts("patrick", new Date(2026, 10, 12));
+    assert.ok(patrick.length > 0 && patrick[0].name === "Patrick");
+    assert.deepEqual([patrick[0].y, patrick[0].m, patrick[0].d], [2027, 3, 17]);
+    const ash = searchFeasts("ash wednesday", new Date(2026, 10, 12));
+    assert.ok(ash.length === 1 && ash[0].rank === "Observance");
+    assert.deepEqual(searchFeasts("zzzznope", new Date(2026, 10, 12)), []);
+    assert.deepEqual(searchFeasts("   ", new Date(2026, 10, 12)), []);
+    // diacritic-insensitive: therese matches Thérèse
+    assert.ok(searchFeasts("therese", new Date(2026, 10, 12)).some((f) => f.name.includes("Thérèse")));
+  });
+
+  it("counts Sunday Masses and streaks", () => {
+    const k = (y, m, d) => key(y, m, d);
+    // three consecutive Sundays ending Nov 8 2026, checked mid-week
+    const log = [k(2026, 10, 25), k(2026, 11, 1), k(2026, 11, 8)];
+    const mid = massStats(log, new Date(2026, 10, 12, 12));
+    assert.equal(mid.total, 3);
+    assert.equal(mid.streak, 3);
+    assert.equal(mid.logged, true);
+    assert.deepEqual([mid.lastSunday.y, mid.lastSunday.m, mid.lastSunday.d], [2026, 11, 8]);
+    // this week not yet logged: streak counts back from the previous Sunday
+    const todo = massStats([k(2026, 10, 25), k(2026, 11, 1)], new Date(2026, 10, 12, 12));
+    assert.equal(todo.logged, false);
+    assert.equal(todo.streak, 2);
+    // gap breaks the streak but keeps the count
+    const gap = massStats([k(2026, 10, 25), k(2026, 11, 8)], new Date(2026, 10, 12, 12));
+    assert.equal(gap.total, 2);
+    assert.equal(gap.streak, 1);
+    // checked on a Sunday that is logged
+    const done = massStats([k(2026, 11, 1), k(2026, 11, 8)], new Date(2026, 10, 8, 12));
+    assert.equal(done.logged, true);
+    assert.equal(done.streak, 2);
+    // empty log and corrupt input
+    assert.deepEqual([massStats([], new Date(2026, 10, 12)).total, massStats([], new Date(2026, 10, 12)).streak], [0, 0]);
+    assert.equal(massStats(null, new Date(2026, 10, 12)).total, 0);
+    assert.equal(sundayOnOrBefore(new Date(2026, 10, 8, 12)).getDate(), 8);
+    assert.equal(sundayOnOrBefore(new Date(2026, 10, 11, 12)).getDate(), 8);
   });
 
   it("covers the full calendar without bad entries", () => {
