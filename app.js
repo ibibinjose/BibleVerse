@@ -222,6 +222,7 @@ function renderStories(){
 const bible = initBible({ showToast });
 // ---------- Feasts & Saints ----------
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MON_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const SEASON_LINE = { Advent: "Prepare the way of the Lord.", Christmas: "Christ is born! Glorify him.", Lent: "Pray, fast, and give.", Triduum: "Behold the wood of the Cross.", Easter: "Christ is risen! Alleluia.", "Ordinary Time": "Grow in grace, day by day." };
 let calY = null, calM = null, calSel = null;
@@ -245,14 +246,15 @@ function renderFeasts(){
     const cls = ["cal-day"];
     if(calY===tY && calM===tM && d===tD) cls.push("today");
     if(calSel && calSel.y===calY && calSel.m===calM && calSel.d===d) cls.push("sel");
-    cells += `<button class="${cls.join(" ")}" data-cal="${d}">${d}${items.length?`<span class="dot" style="background:${RANK_DOT[items[0].rank]||"#9ca3af"}"></span>`:""}</button>`;
+    const dots = items.slice(0,3).map(f=>`<i style="background:${RANK_DOT[f.rank]||"#9ca3af"}"></i>`).join("");
+    cells += `<button class="${cls.join(" ")}" data-cal="${d}" aria-label="${MONTHS[calM-1]} ${d}${items.length?": "+esc(items.map(f=>f.name).join(", ")):""}">${d}${dots?`<span class="dots">${dots}</span>`:""}</button>`;
   }
   const grid = $("#calGrid");
   grid.innerHTML = cells;
   grid.querySelectorAll("[data-cal]").forEach(b=>b.addEventListener("click",()=>{ calSel = { y: calY, m: calM, d: Number(b.dataset.cal) }; renderFeasts(); }));
   const selList = feastsOn(toDate(calSel.y, calSel.m, calSel.d));
   const selSeason = seasonOf(toDate(calSel.y, calSel.m, calSel.d));
-  $("#feastDetail").innerHTML = `<h3 class="view-subtitle">${MONTHS[calSel.m-1]} ${calSel.d} · ${esc(selSeason.name)}</h3>` +
+  $("#feastDetail").innerHTML = `<h3 class="view-subtitle">${WEEKDAYS[toDate(calSel.y, calSel.m, calSel.d).getDay()]}, ${MONTHS[calSel.m-1]} ${calSel.d} · ${esc(selSeason.name)}</h3>` +
     (selList.length ? feastRows(selList) : `<p class="view-sub">No feast this day — an Ordinary (ferial) day.</p>`);
   $("#feastUpcoming").innerHTML = upcomingFeasts(now, 10).map(g=>{
     const when = g.inDays === 1 ? "Tomorrow" : `in ${g.inDays} days`;
@@ -277,6 +279,7 @@ $("#searchInput").addEventListener("input", renderDiscover);
 $("#clearFilterBtn").addEventListener("click",()=>{ activeTopic="All"; renderStories(); renderAll(); });
 $("#calPrevBtn").addEventListener("click",()=>{ calM--; if(calM<1){ calM=12; calY--; } renderFeasts(); });
 $("#calNextBtn").addEventListener("click",()=>{ calM++; if(calM>12){ calM=1; calY++; } renderFeasts(); });
+$("#calTodayBtn").addEventListener("click",()=>{ const n=new Date(); calY=n.getFullYear(); calM=n.getMonth()+1; calSel={ y: calY, m: calM, d: n.getDate() }; renderFeasts(); $("#scrollArea").scrollTo({ top: 0, behavior: "smooth" }); });
 function shuffleOrder(){ for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } }
 $("#shuffleBtn").addEventListener("click",()=>{ shuffleOrder(); renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
 createPullRefresh({
