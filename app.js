@@ -79,6 +79,7 @@ export const VERSES = [...RAW, ...RAW2, ...RAW3].map((r,i)=>{ const [author, han
 import { initBible } from "./bible.js";
 import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
 import { createPullRefresh } from "./pull-refresh.js";
+import { feastsOn, upcomingFeasts, seasonOf, toDate, RANK_DOT } from "./feasts.js";
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
 let activeTopic = "All", reelIndex = 0, order = [...VERSES], reelPool = [...VERSES];
@@ -219,16 +220,63 @@ function renderStories(){
 }
 
 const bible = initBible({ showToast });
+// ---------- Feasts & Saints ----------
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MON_ABBR = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const SEASON_LINE = { Advent: "Prepare the way of the Lord.", Christmas: "Christ is born! Glorify him.", Lent: "Pray, fast, and give.", Triduum: "Behold the wood of the Cross.", Easter: "Christ is risen! Alleluia.", "Ordinary Time": "Grow in grace, day by day." };
+let calY = null, calM = null, calSel = null;
+function feastRows(list){
+  if(!list.length) return "";
+  return `<div class="feast-list">` + list.map(f=>`<div class="feast-row"><span class="rank ${esc(f.rank)}">${esc(f.rank)}</span><div><b>${esc(f.name)}</b><small>${esc(f.about || "")}</small>${f.obligation?`<span class="obl">✦ Holy Day of Obligation</span>`:""}</div></div>`).join("") + `</div>`;
+}
+function renderFeasts(){
+  const now = new Date();
+  if(calY === null){ calY = now.getFullYear(); calM = now.getMonth() + 1; calSel = { y: calY, m: calM, d: now.getDate() }; }
+  const season = seasonOf(now), todayList = feastsOn(now);
+  $("#feastToday").innerHTML = `<div class="season-card" style="--season:${season.color}"><small>${esc(season.name)} · Today</small><b>${todayList.length ? esc(todayList.map(f=>f.name).join(" · ")) : "An Ordinary weekday"}</b><span>${todayList.length && todayList[0].about ? esc(todayList[0].about) : esc(SEASON_LINE[season.name] || "")}</span></div>`;
+  $("#tabFeastDot").hidden = !todayList.some(f=>f.obligation);
+  $("#calTitle").textContent = `${MONTHS[calM-1]} ${calY}`;
+  const first = new Date(calY, calM-1, 1).getDay(), dim = new Date(calY, calM, 0).getDate();
+  const tY = now.getFullYear(), tM = now.getMonth()+1, tD = now.getDate();
+  let cells = ["S","M","T","W","T","F","S"].map(d=>`<span class="cal-dow">${d}</span>`).join("");
+  for(let i=0;i<first;i++) cells += `<span class="cal-day blank"></span>`;
+  for(let d=1; d<=dim; d++){
+    const items = feastsOn(toDate(calY, calM, d));
+    const cls = ["cal-day"];
+    if(calY===tY && calM===tM && d===tD) cls.push("today");
+    if(calSel && calSel.y===calY && calSel.m===calM && calSel.d===d) cls.push("sel");
+    cells += `<button class="${cls.join(" ")}" data-cal="${d}">${d}${items.length?`<span class="dot" style="background:${RANK_DOT[items[0].rank]||"#9ca3af"}"></span>`:""}</button>`;
+  }
+  const grid = $("#calGrid");
+  grid.innerHTML = cells;
+  grid.querySelectorAll("[data-cal]").forEach(b=>b.addEventListener("click",()=>{ calSel = { y: calY, m: calM, d: Number(b.dataset.cal) }; renderFeasts(); }));
+  const selList = feastsOn(toDate(calSel.y, calSel.m, calSel.d));
+  const selSeason = seasonOf(toDate(calSel.y, calSel.m, calSel.d));
+  $("#feastDetail").innerHTML = `<h3 class="view-subtitle">${MONTHS[calSel.m-1]} ${calSel.d} · ${esc(selSeason.name)}</h3>` +
+    (selList.length ? feastRows(selList) : `<p class="view-sub">No feast this day — an Ordinary (ferial) day.</p>`);
+  $("#feastUpcoming").innerHTML = upcomingFeasts(now, 10).map(g=>{
+    const when = g.inDays === 1 ? "Tomorrow" : `in ${g.inDays} days`;
+    return `<button class="up-row" data-up="${g.y}-${g.m}-${g.d}"><span class="up-date"><b>${g.d}</b><span>${MON_ABBR[g.m-1]}</span></span><span class="up-main">${esc(g.items.map(f=>f.name).join(" · "))}<small>${esc(g.items[0].rank)}${g.items.some(f=>f.obligation)?" · ✦ Holy Day of Obligation":""}</small></span><span class="up-when${g.inDays<=7?" soon":""}">${when}</span></button>`;
+  }).join("");
+  $("#feastUpcoming").querySelectorAll("[data-up]").forEach(b=>b.addEventListener("click",()=>{
+    const [y,m,d] = b.dataset.up.split("-").map(Number);
+    calY = y; calM = m; calSel = { y, m, d }; renderFeasts();
+    $("#scrollArea").scrollTo({ top: 0, behavior: "smooth" });
+  }));
+}
 function switchView(name){
   document.querySelectorAll(".view").forEach(v=>v.hidden = v.id !== "view-"+name);
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===name));
   $("#scrollArea").scrollTo({top:0});
   if(name==="reel") renderReel();
   if(name==="bible") bible.ensureLoaded();
+  if(name==="feasts") renderFeasts();
 }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
 $("#searchInput").addEventListener("input", renderDiscover);
 $("#clearFilterBtn").addEventListener("click",()=>{ activeTopic="All"; renderStories(); renderAll(); });
+$("#calPrevBtn").addEventListener("click",()=>{ calM--; if(calM<1){ calM=12; calY--; } renderFeasts(); });
+$("#calNextBtn").addEventListener("click",()=>{ calM++; if(calM>12){ calM=1; calY++; } renderFeasts(); });
 function shuffleOrder(){ for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } }
 $("#shuffleBtn").addEventListener("click",()=>{ shuffleOrder(); renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
 createPullRefresh({
@@ -253,7 +301,7 @@ if(window.Capacitor?.isNativePlatform?.())document.body.classList.add("native");
 $("#scrollArea").addEventListener("scroll",e=>{ document.querySelector(".appbar").classList.toggle("scrolled", e.target.scrollTop>8); },{passive:true});
 function tickClock(){ const d=new Date(); $("#clock").textContent=d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}).replace(/\s?[AP]M/i,""); }
 tickClock(); setInterval(tickClock, 20000);
-renderStories(); renderAll();
+renderStories(); renderAll(); renderFeasts();
 // Web/PWA offline: cache shell + full Bible. Native (Capacitor) apps already
 // carry every file in the bundle, so skip the service worker there.
 if ("serviceWorker" in navigator && !window.Capacitor?.isNativePlatform?.()) {
