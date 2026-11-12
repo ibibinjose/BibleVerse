@@ -5,6 +5,7 @@
   "description": "BibleVerse — Christian daily Scripture companion for iOS & Android. Daily feed of named verses plus the full Catholic Bible in modern English, World English Bible Catholic Edition (73 books), bundled offline.",
   "type": "module",
   "scripts": {
+    "test": "node --test tests/",
     "start": "npm run build:www && node server.js",
     "icons": "node scripts/make-icons.mjs",
     "build:bible": "node scripts/build-bible.mjs",

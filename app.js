@@ -26,20 +26,69 @@ const RAW2 = [
   ["Fruit of the Spirit","But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control.","Galatians 5:22–23","Galatians","Grace","Fruit grows. It is not forced. Stay rooted and watch what forms.",1876,"4 DAYS AGO"],
   ["In the Beginning","In the beginning God created the heavens and the earth.","Genesis 1:1","Genesis","Faith","Every good story in Scripture starts with a Creator who brings order from nothing.",4520,"4 DAYS AGO"],
 ];
+const RAW3 = [
+  ["The Lord Is My Light","The LORD is my light and my salvation. Whom shall I fear? The LORD is the strength of my life. Of whom shall I be afraid?","Psalm 27:1","Psalms","Courage","Fear asks who is against you. Faith answers who is with you.",4802,"5 DAYS AGO"],
+  ["Near to the Brokenhearted","The LORD is near to those who have a broken heart, and saves those who have a crushed spirit.","Psalm 34:18","Psalms","Hope","When your heart breaks, God does not step back — he steps closer.",3654,"5 DAYS AGO"],
+  ["My Refuge and Fortress","I will say of the LORD, “He is my refuge and my fortress; my God, in whom I trust.”","Psalm 91:2","Psalms","Peace","Trust is saying it out loud: God is my safe place.",2917,"6 DAYS AGO"],
+  ["My Help Comes from the Lord","I will lift up my eyes to the hills. Where does my help come from? My help comes from the LORD, who made heaven and earth.","Psalm 121:1–2","Psalms","Hope","Look up. Your help has a Maker.",4430,"6 DAYS AGO"],
+  ["Trust Without Leaning","Trust in the LORD with all your heart, and don’t lean on your own understanding. In all your ways acknowledge him, and he will make your paths straight.","Proverbs 3:5–6","Proverbs","Faith","You do not have to understand the path to trust the Guide.",5218,"1 WEEK AGO"],
+  ["Perfect Peace","You will keep whoever’s mind is steadfast in perfect peace, because he trusts in you.","Isaiah 26:3","Isaiah","Peace","Peace grows where the mind stays — fixed on God, not on the storm.",3875,"1 WEEK AGO"],
+  ["Through the Waters","When you pass through the waters, I will be with you, and through the rivers, they will not overflow you. When you walk through the fire, you will not be burned, and flame will not scorch you.","Isaiah 43:2","Isaiah","Strength","The promise is not the absence of deep water. It is company in it.",4102,"1 WEEK AGO"],
+  ["Walk Humbly","He has shown you, O man, what is good. What does the LORD require of you, but to act justly, to love mercy, and to walk humbly with your God?","Micah 6:8","Micah","Faith","A whole life with God in one sentence: do justice, love mercy, walk humbly.",2764,"1 WEEK AGO"],
+  ["Rejoicing Over You","The LORD, your God, is among you, a mighty one who will save. He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.","Zephaniah 3:17","Zephaniah","Joy","Read that slowly: God himself sings over you with joy.",3389,"2 WEEKS AGO"],
+  ["Seek First","But seek first God’s Kingdom and his righteousness; and all these things will be given to you as well.","Matthew 6:33","Matthew","Faith","Put first things first, and the rest finds its place.",4022,"2 WEEKS AGO"],
+  ["Come and Rest","Come to me, all you who labor and are heavily burdened, and I will give you rest.","Matthew 11:28","Matthew","Peace","Jesus does not tell the weary to try harder. He tells them to come.",5340,"2 WEEKS AGO"],
+  ["God So Loved the World","For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.","John 3:16","John","Love","The most famous verse in the world is a love letter in one sentence.",5987,"2 WEEKS AGO"],
+  ["Light of the World","Again, therefore, Jesus spoke to them, saying, “I am the light of the world. He who follows me will not walk in the darkness, but will have the light of life.”","John 8:12","John","Hope","Follow the Light and the darkness cannot keep you.",3150,"2 WEEKS AGO"],
+  ["Peace I Leave With You","Peace I leave with you. My peace I give to you; not as the world gives, I give to you. Don’t let your heart be troubled, neither let it be fearful.","John 14:27","John","Peace","Jesus left peace behind like an inheritance — and it is yours.",4288,"2 WEEKS AGO"],
+  ["While We Were Sinners","But God commends his own love toward us, in that while we were yet sinners, Christ died for us.","Romans 5:8","Romans","Love","God did not wait for you to be worthy. That is the whole point.",4761,"2 WEEKS AGO"],
+  ["God of Hope","Now may the God of hope fill you with all joy and peace in believing, that you may abound in hope in the power of the Holy Spirit.","Romans 15:13","Romans","Joy","Hope here overflows — it abounds, by the Spirit’s power.",2613,"2 WEEKS AGO"],
+  ["Rejoicing in Hope","Rejoicing in hope, enduring in troubles, continuing steadfastly in prayer.","Romans 12:12","Romans","Hope","Three habits for hard days: rejoice, endure, pray.",1945,"3 WEEKS AGO"],
+  ["Grace Is Sufficient","He has said to me, “My grace is sufficient for you, for my power is made perfect in weakness.” Most gladly therefore I will rather glory in my weaknesses, that the power of Christ may rest on me.","2 Corinthians 12:9","2 Corinthians","Grace","Your weakness is not the end of the story. It is where his power rests.",3590,"3 WEEKS AGO"],
+  ["Saved by Grace","For by grace you have been saved through faith, and that not of yourselves; it is the gift of God.","Ephesians 2:8","Ephesians","Grace","Salvation is a gift, not a wage. Receive it.",4873,"3 WEEKS AGO"],
+  ["Through Christ Who Strengthens","I can do all things through Christ who strengthens me.","Philippians 4:13","Philippians","Strength","Not every dream — every duty. Christ supplies the strength.",5536,"3 WEEKS AGO"],
+  ["Work Heartily","And whatever you do, work heartily, as for the Lord and not for men.","Colossians 3:23","Colossians","Faith","Ordinary work becomes worship when it is done for the Lord.",1872,"3 WEEKS AGO"],
+  ["Rejoice, Pray, Give Thanks","Always rejoice. Pray without ceasing. In everything give thanks, for this is the will of God in Christ Jesus toward you.","1 Thessalonians 5:16–18","1 Thessalonians","Joy","God’s will in three short steps: rejoice, pray, give thanks.",2418,"3 WEEKS AGO"],
+  ["Power, Love, Self-Control","For God didn’t give us a spirit of fear, but of power, love, and self-control.","2 Timothy 1:7","2 Timothy","Courage","Fear is not from God. Power, love, and a steady mind are.",3944,"3 WEEKS AGO"],
+  ["Assurance of Hope","Now faith is assurance of things hoped for, proof of things not seen.","Hebrews 11:1","Hebrews","Faith","Faith is not guessing. It is confidence in what you cannot yet see.",2871,"3 WEEKS AGO"],
+  ["Cast Your Worries","Casting all your worries on him, because he cares for you.","1 Peter 5:7","1 Peter","Peace","Every worry has an address: cast it on him. He cares.",4526,"3 WEEKS AGO"],
+  ["Every Tear Wiped Away","He will wipe away every tear from their eyes. Death will be no more; neither will there be mourning, nor crying, nor pain any more. The first things have passed away.","Revelation 21:4","Revelation","Hope","The end of the story is God himself drying every tear.",5105,"3 WEEKS AGO"],
+  ["The Lord Will Fight for You","The LORD will fight for you, and you shall be still.","Exodus 14:14","Exodus","Strength","Some battles are won by standing still and letting God fight.",4690,"3 WEEKS AGO"],
+  ["Never Forsaken","Be strong and courageous. Don’t be afraid or scared of them, for the LORD your God himself is who goes with you. He will not fail you nor forsake you.","Deuteronomy 31:6","Deuteronomy","Courage","He goes with you. He will not fail you. He will not forsake you.",3812,"3 WEEKS AGO"],
+  ["Joy Is Your Strength","Then he said to them, “Go your way. Eat the fat, drink the sweet, and send portions to him for whom nothing is prepared, for today is holy to our Lord. Don’t be grieved, for the joy of the LORD is your strength.”","Nehemiah 8:10","Nehemiah","Joy","Strength for the grieving day: the joy of the Lord.",2258,"3 WEEKS AGO"],
+  ["Feet Like the Deer","GOD, the Lord, is my strength. He makes my feet like deer’s feet, and enables me to go in high places.","Habakkuk 3:19","Habakkuk","Strength","Even on the steepest climb, he gives you the feet for it.",2094,"3 WEEKS AGO"],
+  ["Ask for Wisdom","But if any of you lacks wisdom, let him ask of God, who gives to all liberally and without reproach, and it will be given to him.","James 1:5","James","Faith","God gives wisdom generously — and never scolds you for asking.",1736,"3 WEEKS AGO"],
+  ["Loved First","We love him, because he first loved us.","1 John 4:19","1 John","Love","Every love you give is an echo. His came first.",4367,"3 WEEKS AGO"],
+];
 const AUTHORS = {
-  Genesis: ["Moses", "moses"], Joshua: ["Joshua", "joshua"], Psalms: ["David", "david"],
-  Isaiah: ["Isaiah", "isaiah"], Jeremiah: ["Jeremiah", "jeremiah"], Lamentations: ["Jeremiah", "jeremiah"],
+  Genesis: ["Moses", "moses"], Exodus: ["Moses", "moses"], Deuteronomy: ["Moses", "moses"],
+  Joshua: ["Joshua", "joshua"], Nehemiah: ["Nehemiah", "nehemiah"], Psalms: ["David", "david"],
+  Proverbs: ["Solomon", "solomon"], Isaiah: ["Isaiah", "isaiah"], Jeremiah: ["Jeremiah", "jeremiah"],
+  Lamentations: ["Jeremiah", "jeremiah"], Micah: ["Micah", "micah"], Habakkuk: ["Habakkuk", "habakkuk"],
+  Zephaniah: ["Zephaniah", "zephaniah"],
   Matthew: ["Matthew", "matthew"], John: ["John", "john"], Romans: ["Paul", "paul"],
   "1 Corinthians": ["Paul", "paul"], "2 Corinthians": ["Paul", "paul"], Galatians: ["Paul", "paul"],
-  Philippians: ["Paul", "paul"], Hebrews: ["Hebrews", "hebrews"],
+  Ephesians: ["Paul", "paul"], Philippians: ["Paul", "paul"], Colossians: ["Paul", "paul"],
+  "1 Thessalonians": ["Paul", "paul"], "2 Timothy": ["Paul", "paul"], Hebrews: ["Hebrews", "hebrews"],
+  James: ["James", "james"], "1 Peter": ["Peter", "peter"], "1 John": ["John", "john"],
+  Revelation: ["John", "john"],
 };
 function authorOf(book){ return AUTHORS[book] || [book, book.toLowerCase().replace(/[^a-z0-9]+/g, "")]; }
-export const VERSES = [...RAW, ...RAW2].map((r,i)=>{ const [author, handle] = authorOf(r[3]); return { id:i+1, name:r[0], verse:r[1], ref:r[2], book:r[3], topic:r[4], reflection:r[5], baseLikes:r[6], time:r[7], author, handle, ...PALETTES[i % PALETTES.length] }; });
+export const VERSES = [...RAW, ...RAW2, ...RAW3].map((r,i)=>{ const [author, handle] = authorOf(r[3]); return { id:i+1, name:r[0], verse:r[1], ref:r[2], book:r[3], topic:r[4], reflection:r[5], baseLikes:r[6], time:r[7], author, handle, ...PALETTES[i % PALETTES.length] }; });
 
 import { initBible } from "./bible.js";
+import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
-let activeTopic = "All", reelIndex = 0, order = [...VERSES];
+let activeTopic = "All", reelIndex = 0, order = [...VERSES], reelPool = [...VERSES];
+// Fresh feed, stable day: date-seeded shuffle, unseen verses first, one-step
+// rotation per visit — the top of the feed is never the same twice in a row.
+try {
+  const rot = buildFeedOrder(VERSES, localStorage);
+  order = rot.order;
+  reelPool = rot.base;
+  reelIndex = reelPool.length ? dayOfYear() % reelPool.length : 0;
+} catch { order = [...VERSES]; reelPool = [...VERSES]; reelIndex = 0; }
 let liked = new Set(), saved = new Set(), comments = {};
 try { liked = new Set(JSON.parse(localStorage.getItem("bibleverse-liked")||"[]")); saved = new Set(JSON.parse(localStorage.getItem("bibleverse-saved")||"[]")); comments = JSON.parse(localStorage.getItem("bibleverse-comments")||"{}"); } catch {}
 function persist(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{ showToast("Storage unavailable — changes won't be kept"); } }
@@ -123,7 +172,7 @@ function renderDiscover(){
   $("#gridEmpty").textContent = tokens.length ? `No verses match “${($("#searchInput").value || "").trim()}”. Try a name, a topic like Peace, or a reference like John 1:5.` : "No verse matches that search.";
 }
 function renderProfile(){ renderGrid($("#profileGrid"),order); $("#statPosts").textContent=VERSES.length; $("#statLiked").textContent=liked.size; $("#statSaved2").textContent=saved.size; }
-function renderReel(){ const v=order[reelIndex%order.length]; $("#reelCard").innerHTML=`<div class="media" data-dbl="${v.id}" style="background:${v.bg};color:${v.fg}"><p class="media-kicker">Verse of the day · ${esc(v.author)} · ${esc(v.topic)}</p><h2 class="media-name">${esc(v.name)}</h2><p class="media-verse">“${esc(v.verse)}”</p><span class="media-ref">${esc(v.ref)}</span></div>`; $("#reelLikeBtn").textContent=liked.has(v.id)?"♥ Liked":"♡ Like"; bindMedia($("#reelCard")); }
+function renderReel(){ const v=reelPool[reelIndex%reelPool.length]; $("#reelCard").innerHTML=`<div class="media" data-dbl="${v.id}" style="background:${v.bg};color:${v.fg}"><p class="media-kicker">Verse of the day · ${esc(v.author)} · ${esc(v.topic)}</p><h2 class="media-name">${esc(v.name)}</h2><p class="media-verse">“${esc(v.verse)}”</p><span class="media-ref">${esc(v.ref)}</span></div>`; $("#reelLikeBtn").textContent=liked.has(v.id)?"♥ Liked":"♡ Like"; bindMedia($("#reelCard")); }
 function updateBadges(){ $("#savedBadge").textContent=saved.size||""; const b=$("#tabSavedBadge"); b.hidden=saved.size===0; b.textContent=saved.size; $("#statLiked").textContent=liked.size; $("#statSaved2").textContent=saved.size; }
 
 function renderAll(){ renderFeed(); renderSaved(); renderDiscover(); renderProfile(); renderReel(); updateBadges(); }
@@ -179,9 +228,9 @@ function switchView(name){
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
 $("#searchInput").addEventListener("input", renderDiscover);
 $("#clearFilterBtn").addEventListener("click",()=>{ activeTopic="All"; renderStories(); renderAll(); });
-$("#shuffleBtn").addEventListener("click",()=>{ order=[...order].sort(()=>Math.random()-.5); renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
-$("#reelNextBtn").addEventListener("click",()=>{ reelIndex=(reelIndex+1)%order.length; renderReel(); });
-$("#reelLikeBtn").addEventListener("click",()=>toggleLike(order[reelIndex%order.length].id, true));
+$("#shuffleBtn").addEventListener("click",()=>{ for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
+$("#reelNextBtn").addEventListener("click",()=>{ reelIndex=(reelIndex+1)%reelPool.length; renderReel(); });
+$("#reelLikeBtn").addEventListener("click",()=>toggleLike(reelPool[reelIndex%reelPool.length].id, true));
 $("#newPostBtn").addEventListener("click",()=>switchView("reel"));
 $("#notifBtn").addEventListener("click",()=>switchView("saved"));
 $("#shareAppBtn").addEventListener("click",()=>shareApp());
