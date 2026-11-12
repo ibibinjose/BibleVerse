@@ -1,0 +1,15 @@
+{
+  "appId": "com.bibleverse.app",
+  "appName": "BibleVerse",
+  "webDir": "www",
+  "backgroundColor": "#ffffffff",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#ffffffff"
+  },
+  "ios": {
+    "backgroundColor": "#ffffffff"
+  }
+}

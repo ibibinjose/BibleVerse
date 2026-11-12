@@ -1,0 +1,19 @@
+{
+  "id": ".",
+  "name": "BibleVerse",
+  "short_name": "BibleVerse",
+  "description": "Every verse has a name. A Christian companion with a daily verse feed and the full Catholic Bible in modern English, WEBC (73 books) — readable offline.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "categories": ["books", "education", "reference"],
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

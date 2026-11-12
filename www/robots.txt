@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bibleverse.app/sitemap.xml

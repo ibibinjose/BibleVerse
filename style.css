@@ -1,0 +1,248 @@
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--ig-border:#dbdbdb;--ig-text:#000;--ig-sub:#737373;--ig-blue:#0095f6;--ig-red:#ff3040}
+html,body{height:100%}
+body{margin:0;font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0a0a;color:#fff}
+button{font:inherit;cursor:pointer;background:none;border:0;color:inherit;touch-action:manipulation}
+input{font:inherit}
+
+/* Desktop stage */
+.stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;gap:56px;padding:28px 20px;background:radial-gradient(900px 500px at 15% 0%,#1d180f 0%,transparent 55%),#0a0a0a}
+.side{max-width:400px;display:block}
+.side-logo{font-family:Fraunces,serif;font-weight:900;font-size:22px;color:#f5c542;margin:0 0 18px}
+.side h1{font-family:Fraunces,serif;font-size:52px;line-height:.95;letter-spacing:-.03em;margin:0;font-weight:900}
+.side h1 em{color:#f5c542}
+.side-copy{color:#a8a29e;line-height:1.65;margin:16px 0 20px}
+.side-list{list-style:none;padding:0;margin:0 0 20px;display:grid;gap:12px}
+.side-list li{display:grid;gap:2px;border-top:1px solid #262626;padding-top:12px}
+.side-list b{font-size:14px}
+.side-list span{color:#a8a29e;font-size:13px}
+.side-hint{color:#78716c;font-size:13px;line-height:1.6}
+.side-code{display:inline-block;margin-top:10px;background:#171412;border:1px solid #2a2521;color:#fde68a;padding:9px 12px;border-radius:8px;font-size:12.5px}
+
+/* Phone — native app shell */
+.phone{position:relative;width:min(430px,100vw);height:min(932px,100dvh);background:#fff;color:#000;display:flex;flex-direction:column;overflow:hidden;flex:none}
+@media(min-width:900px){.phone{border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 30px 80px rgba(0,0,0,.65),0 0 0 1px #333;height:min(880px,calc(100dvh - 40px))}}
+@media(max-width:899px){.stage{padding:0;gap:0}.side{display:none}.phone{width:100vw;height:100dvh}}
+.notch{display:none}
+@media(min-width:900px){.notch{display:block;position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#000;border-radius:99px;z-index:50}}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 22px 4px;font-size:14px;font-weight:700;background:#fff;flex:none}
+@media(min-width:900px){.statusbar{padding-top:14px}}
+.status-icons{display:flex;align-items:center;gap:6px}
+.battery{width:25px;height:12px;border:1.5px solid #000;border-radius:4px;padding:1.5px;display:inline-block}
+.battery i{display:block;height:100%;width:78%;background:#000;border-radius:2px}
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 10px;border-bottom:1px solid var(--ig-border);background:#fff;flex:none;z-index:5;transition:box-shadow .2s}
+.appbar.scrolled{box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.story:active,.tile:active{transform:scale(.96)}
+.book-row:active{background:#f5f5f5}
+.wordmark{font-family:Fraunces,serif;font-weight:900;font-size:26px;letter-spacing:-.03em;display:inline-flex;align-items:center}
+.brand-mark{width:30px;height:30px;border-radius:8px;vertical-align:-6px;margin-right:9px}
+.brand-mark.sm{width:27px;height:27px;border-radius:7px;vertical-align:-5px;margin-right:7px}
+.side-logo{display:flex;align-items:center}
+.appbar-actions{display:flex;gap:20px;align-items:center}
+.icon-btn{position:relative;width:26px;height:26px;padding:0;color:#000}
+.icon-btn svg{width:26px;height:26px;display:block}
+.dot-badge,.count-badge{position:absolute;top:-4px;right:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--ig-red);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #fff}
+.dot-badge:empty{display:none}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:#fff;position:relative}
+.scroll::-webkit-scrollbar{display:none}
+.view{padding-bottom:14px}
+/* Stories — topic row */
+.stories{display:flex;gap:16px;overflow-x:auto;padding:12px 16px 10px;scrollbar-width:none;border-bottom:1px solid #efefef}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:none;width:66px;text-align:center;color:#000}
+.story-ring{width:66px;height:66px;border-radius:50%;padding:3px;background:conic-gradient(from 210deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5,#feda75)}
+.story-ring.seen{background:#dbdbdb}
+.story-ring.active{background:#000}
+.story-avatar{width:100%;height:100%;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font-weight:900;font-size:15px;color:#fff;position:relative}
+.story.you .story-avatar{background:#262626}
+.story-plus{position:absolute;right:-1px;bottom:-1px;width:20px;height:20px;border-radius:50%;background:var(--ig-blue);color:#fff;border:2.5px solid #fff;display:grid;place-items:center;font-size:14px;line-height:1}
+.story > span{display:block;font-size:11.5px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story.active > span{font-weight:800}
+/* Post */
+.post{border-bottom:1px solid #efefef;padding-bottom:14px}
+.post-head{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.avatar{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px}
+.post-user{flex:1;min-width:0;line-height:1.2}
+.post-user b{font-size:13.5px;display:flex;align-items:center;gap:4px}
+.verified{width:13px;height:13px;flex:none;vertical-align:-2px}
+.search-icon{width:16px;height:16px;flex:none}
+.post-user small{color:var(--ig-sub);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.more-btn{font-size:20px;letter-spacing:2px;padding:4px;color:#000}
+.follow-btn{color:var(--ig-blue);font-weight:700;font-size:13px;padding:4px}
+/* Verse media — the “photo” of the post */
+.media{position:relative;aspect-ratio:4/4.4;width:100%;overflow:hidden;cursor:pointer;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
+.media::after{content:"✦";position:absolute;right:18px;top:14px;font-size:20px;opacity:.75}
+.media-kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin:0 0 12px}
+.media-name{font-family:Fraunces,serif;font-weight:900;font-size:clamp(32px,9.5vw,42px);line-height:1;letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
+.media-verse{font-family:Newsreader,Georgia,serif;font-size:clamp(19px,5.8vw,24px);line-height:1.45;margin:0;font-weight:500;text-wrap:pretty}
+.media-ref{margin-top:18px;display:inline-flex;align-self:flex-start;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(4px);padding:7px 11px;border-radius:999px;font-size:12.5px;font-weight:800}
+.media-dots{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:5px}
+.media-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
+.media-dots i.on{background:#fff}
+.burst{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(0);font-size:96px;color:#fff;text-shadow:0 8px 30px rgba(0,0,0,.35);pointer-events:none;z-index:60;opacity:0}
+.burst.pop{animation:burst .7s ease forwards}
+@keyframes burst{0%{transform:translate(-50%,-50%) scale(0);opacity:0}25%{transform:translate(-50%,-50%) scale(1.15);opacity:1}55%{transform:translate(-50%,-50%) scale(.95);opacity:1}100%{transform:translate(-50%,-60%) scale(1);opacity:0}}
+/* Actions — verse card row */
+.actions{display:flex;align-items:center;gap:16px;padding:10px 12px 4px}
+.act{width:27px;height:27px;padding:0;color:#000;position:relative}
+.act svg{width:27px;height:27px;display:block}
+.act.liked{color:var(--ig-red)}
+.act.liked svg{fill:var(--ig-red)}
+.act.saved svg{fill:#000}
+.act:active{transform:scale(.88)}
+.actions .spacer{flex:1}
+.likes{padding:2px 12px 0;font-size:13.5px}
+.likes b{font-weight:800}
+.caption{padding:4px 12px 0;font-size:13.5px;line-height:1.45}
+.caption b{margin-right:5px}
+.caption .name-tag{color:#000;font-weight:800}
+.reflection-line{color:#262626}
+.comments-link{padding:5px 12px 0;color:var(--ig-sub);font-size:13.5px;text-align:left;width:100%}
+.comment-row{padding:3px 12px 0;font-size:13.5px}
+.comment-row b{margin-right:5px}
+.time{padding:6px 12px 0;color:var(--ig-sub);font-size:11px;letter-spacing:.02em;text-transform:uppercase}
+.add-comment{display:flex;gap:8px;align-items:center;padding:8px 12px 0}
+.add-comment input{flex:1;border:0;outline:0;font-size:16px;background:transparent;color:#000}
+.add-comment input::placeholder{color:var(--ig-sub)}
+.post-btn{color:var(--ig-blue);font-weight:800;font-size:13px}
+/* Tab bar — native bottom nav */
+.tabbar{flex:none;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 4px;border-top:1px solid var(--ig-border);background:#fff;z-index:10}
+.tab{width:48px;height:40px;display:grid;place-items:center;color:#000;position:relative;padding:0}
+.tab svg{width:26px;height:26px}
+.tab:not(.active){opacity:.45}
+.tab.active{opacity:1}
+.tab-avatar{width:27px;height:27px;border-radius:50%;background:#000;color:#f5c542;display:grid;place-items:center;font-size:9px;font-weight:900;border:2px solid #fff;box-shadow:0 0 0 1.5px #000}
+.tab-badge{position:absolute;top:2px;right:6px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--ig-red);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;border:2px solid #fff}
+.home-indicator{width:134px;height:5px;border-radius:99px;background:#000;opacity:.85;margin:6px auto 7px;flex:none}
+/* Native app / installed PWA: the OS draws the real status bar and home
+   indicator, so hide the fakes and respect the safe areas instead. */
+body.native .statusbar,body.native .home-indicator{display:none}
+body.native .appbar{padding-top:max(8px,env(safe-area-inset-top))}
+body.native .tabbar{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+@media(display-mode:standalone){.statusbar,.home-indicator{display:none}.appbar{padding-top:max(8px,env(safe-area-inset-top))}.tabbar{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
+/* Discover / profile grids */
+.searchbar{display:flex;align-items:center;gap:8px;background:#efefef;border-radius:10px;margin:12px 16px 4px;padding:9px 12px;color:var(--ig-sub)}
+.searchbar input{flex:1;border:0;outline:0;background:transparent;font-size:16px;color:#000}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--ig-border);background:#fff;color:#000;padding:7px 13px;border-radius:9px;font-weight:700;font-size:13px}
+.chip.active{background:#000;color:#fff;border-color:#000}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px}
+.tile{aspect-ratio:1;border:0;border-radius:12px;padding:12px;text-align:left;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;overflow:hidden;position:relative}
+.tile b{font-family:Fraunces,serif;font-size:14px;line-height:1.05}
+.tile span{font-size:10.5px;opacity:.85;font-weight:700}
+.tile .tile-heart{position:absolute;top:8px;right:8px;font-size:12px}
+.tile .tile-handle{opacity:.75;font-weight:600}
+.grid-empty{text-align:center;color:var(--ig-sub);padding:30px}
+.view-title{font-size:22px;margin:16px 16px 2px;font-weight:800;letter-spacing:-.02em}
+.view-sub{margin:0 16px 8px;color:var(--ig-sub);font-size:13px;line-height:1.5}
+.empty{text-align:center;padding:48px 30px;color:#000}
+.empty-emoji{font-size:38px}
+.empty h2{margin:10px 0 6px;font-size:18px}
+.empty p{color:var(--ig-sub);line-height:1.5;margin:0 0 16px;font-size:14px}
+.ig-btn{background:var(--ig-blue);color:#fff;font-weight:800;font-size:14px;padding:9px 18px;border-radius:10px}
+.ig-btn.ghost{background:#efefef;color:#000}
+.feed-end{text-align:center;color:#000;font-weight:700;padding:26px 20px 10px;font-size:14px;line-height:1.6}
+.feed-end span{color:var(--ig-sub);font-weight:400;font-size:13px}
+/* Reel */
+.reel{margin:12px;border-radius:16px;overflow:hidden}
+.reel .media{aspect-ratio:4/5.4;text-align:center;align-items:center}
+.reel .media-ref{align-self:center}
+.reel-hint{text-align:center;color:var(--ig-sub);font-size:12.5px;margin:4px 16px 12px}
+.reel-actions{display:flex;gap:10px;justify-content:center;padding:0 16px 10px}
+.reel-actions .ig-btn{flex:1}
+/* Profile */
+.profile-head{display:flex;align-items:center;gap:28px;padding:16px}
+.profile-avatar{width:82px;height:82px;border-radius:50%;background:#0c0c0e;flex:none;overflow:hidden;border:3px solid #f5c542}
+.profile-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.tab-avatar{overflow:hidden}
+.tab-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.about-open{width:calc(100% - 32px);margin:0 16px 12px;display:flex;justify-content:space-between;align-items:center;background:#efefef;border-radius:10px;padding:11px 14px;font-weight:700;font-size:13.5px;color:#000}
+.about-open span{color:var(--ig-sub);font-size:16px}
+.version-foot{text-align:center;color:var(--ig-sub);font-size:11.5px;padding:14px 16px 10px;line-height:1.5}
+/* About */
+.about-wrap{padding:4px 0 18px}
+.about-wrap .reader-back{margin:6px 0 0 12px}
+.about-logo{width:84px;height:84px;border-radius:22px;display:block;margin:10px auto 2px;box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.about-title{text-align:center;margin-top:8px}
+.about-tag{text-align:center}
+.about-copy{margin:8px 16px;color:#262626;font-size:14px;line-height:1.6}
+.about-list{list-style:none;padding:0;margin:6px 16px 0;display:grid;gap:10px}
+.about-list li{display:grid;gap:2px;border-top:1px solid #efefef;padding-top:10px}
+.about-list b{font-size:13.5px}
+.about-list span{color:#404040;font-size:13px;line-height:1.55}
+.about-source{margin:12px 16px 0;color:var(--ig-sub);font-size:12px;line-height:1.6;border-top:1px solid #efefef;padding-top:10px}
+.about-share{display:grid;gap:8px;padding:14px 16px 0}
+.profile-stats{display:flex;gap:26px;text-align:center;flex:1;justify-content:space-around}
+.profile-stats b{display:block;font-size:17px}
+.profile-stats span{font-size:13px;color:#262626}
+.profile-name{margin:0 16px;font-weight:800;font-size:14px}
+.profile-bio{margin:3px 16px 12px;font-size:14px;line-height:1.5}
+.profile-actions{display:flex;gap:8px;padding:0 16px 14px}
+.profile-actions .ig-btn{flex:1}
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%) translateY(16px);background:#262626;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;line-height:1.45;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:70;max-width:92%}
+button:focus-visible,[data-dbl]:focus-visible{outline:2px solid var(--ig-blue);outline-offset:2px}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Full Bible reader */
+.bible-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-right:16px}
+.bible-title{margin-top:14px}
+.bible-sub{margin-left:16px}
+.offline-pill{flex:none;margin-top:18px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;font-size:11px;font-weight:800;padding:6px 9px;border-radius:999px}
+.bible-meta{margin:8px 16px 0;color:var(--ig-sub);font-size:12.5px}
+.bible-results{padding:6px 16px 0;display:grid;gap:2px}
+.result-row{text-align:left;background:#fff;border:1px solid #efefef;border-radius:10px;padding:10px 12px;display:grid;gap:3px;color:#000}
+.result-row b{font-size:13px}
+.result-row span{font-size:13px;color:#404040;line-height:1.45}
+.continue-card{width:calc(100% - 32px);margin:14px 16px 2px;background:#000;color:#fff;border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;text-align:left}
+.continue-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#f5c542;font-weight:800}
+.continue-card b{flex:1;font-family:Fraunces,serif;font-size:19px}
+.continue-arrow{font-size:18px}
+.seg{display:flex;background:#efefef;border-radius:10px;padding:3px;margin:14px 16px 8px;gap:3px}
+.seg-btn{flex:1;padding:7px 4px;border-radius:8px;font-size:12.5px;font-weight:700;color:#262626}
+.seg-btn.active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);color:#000}
+.bible-count{margin:2px 16px 8px;color:var(--ig-sub);font-size:12px}
+.book-list{border-top:1px solid #efefef}
+.book-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #efefef;text-align:left;color:#000;background:#fff}
+.book-num{color:#a3a3a3;font-size:12px;font-weight:800;width:24px}
+.book-main{flex:1;display:grid;gap:1px}
+.book-main b{font-size:15px}
+.book-main small{color:var(--ig-sub);font-size:12px}
+.book-ch{color:var(--ig-sub);font-size:12px;font-weight:700;white-space:nowrap;background:#f4f4f5;border-radius:999px;padding:5px 10px}
+.reader{padding-bottom:8px}
+.reader-head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #efefef;z-index:3}
+.reader-back{color:var(--ig-blue);font-weight:700;font-size:14px;padding:4px}
+.reader-title{flex:1;text-align:center;display:grid;line-height:1.15}
+.reader-title b{font-family:Fraunces,serif;font-size:19px}
+.reader-title span{color:var(--ig-sub);font-size:11.5px}
+.reader-font{display:flex;gap:4px}
+.reader-font button{border:1px solid var(--ig-border);background:#fff;border-radius:8px;padding:5px 8px;font-weight:800;font-size:12px;color:#000}
+.chapter-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 12px;scrollbar-width:none;border-bottom:1px solid #efefef}
+.chapter-chips::-webkit-scrollbar{display:none}
+.chapter-chip{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--ig-border);background:#fff;font-weight:700;font-size:13px;color:#000}
+.chapter-chip.active{background:#000;color:#fff;border-color:#000}
+.verses{padding:16px 20px 8px;font-family:Newsreader,Georgia,serif;line-height:1.75;color:#171717}
+.verse-line{margin:0 0 10px;cursor:pointer;border-radius:8px;padding:4px 6px}
+.verse-line sup{font-family:"DM Sans",sans-serif;font-size:.62em;font-weight:800;color:#b45309;margin-right:6px}
+.verse-line.selected{background:#fef3c7}
+.selected-bar{position:sticky;bottom:8px;margin:8px 12px;background:#262626;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:4}
+.selected-bar span{flex:1;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selected-bar button{background:#fff;color:#000;font-weight:800;font-size:12.5px;padding:7px 11px;border-radius:8px}
+.reader-nav{display:flex;gap:8px;padding:10px 12px 4px}
+.reader-nav .ig-btn{flex:1}
+.reader-nav .ig-btn:disabled{opacity:.35}
+.tab[data-view="bible"] svg{width:27px;height:27px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Web refinements — hover-capable devices get hover affordances, a visible
+   scrollbar, and selectable verse text for copying. */
+::selection{background:#fde68a}
+@media(hover:hover){
+  .tab:not(.active):hover{opacity:.9}
+  .chip:hover{border-color:#000}
+  .book-row:hover{background:#fafafa}
+  .tile:hover{filter:brightness(1.07)}
+  .media{user-select:text}
+  .scroll{scrollbar-width:thin;scrollbar-color:#d4d4d4 transparent}
+  .scroll::-webkit-scrollbar{display:block;width:8px}
+  .scroll::-webkit-scrollbar-thumb{background:#d4d4d4;border-radius:99px;border:2px solid #fff}
+}
