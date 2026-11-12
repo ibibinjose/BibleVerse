@@ -245,6 +245,7 @@ function renderFeasts(){
   for(let d=1; d<=dim; d++){
     const items = feastsOn(toDate(calY, calM, d));
     const cls = ["cal-day"];
+    if(new Date(calY, calM-1, d).getDay()===0) cls.push("sun");
     if(calY===tY && calM===tM && d===tD) cls.push("today");
     if(calSel && calSel.y===calY && calSel.m===calM && calSel.d===d) cls.push("sel");
     const dots = items.slice(0,3).map(f=>`<i style="background:${RANK_DOT[f.rank]||"#9ca3af"}"></i>`).join("");
