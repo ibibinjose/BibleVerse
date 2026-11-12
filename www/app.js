@@ -336,6 +336,7 @@ $("#reelLikeBtn").addEventListener("click",()=>toggleLike(reelPool[reelIndex%ree
 $("#newPostBtn").addEventListener("click",()=>switchView("reel"));
 $("#notifBtn").addEventListener("click",()=>switchView("saved"));
 $("#shareAppBtn").addEventListener("click",()=>shareApp());
+$("#wordmarkBtn").addEventListener("click",()=>switchView("profile"));
 $("#profileShareBtn").addEventListener("click",()=>shareApp());
 $("#aboutBtn").addEventListener("click",()=>switchView("about"));
 $("#aboutBackBtn").addEventListener("click",()=>switchView("profile"));

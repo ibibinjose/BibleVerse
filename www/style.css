@@ -34,7 +34,7 @@ input{font:inherit}
 .appbar.scrolled{box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .story:active,.tile:active{transform:scale(.96)}
 .book-row:active{background:#f5f5f5}
-.wordmark{font-family:Fraunces,serif;font-weight:900;font-size:26px;letter-spacing:-.03em;display:inline-flex;align-items:center}
+.wordmark{font-family:Fraunces,serif;font-weight:900;font-size:26px;letter-spacing:-.03em;display:inline-flex;align-items:center;padding:0;color:#000}
 .brand-mark{width:30px;height:30px;border-radius:8px;vertical-align:-6px;margin-right:9px}
 .brand-mark.sm{width:27px;height:27px;border-radius:7px;vertical-align:-5px;margin-right:7px}
 .side-logo{display:flex;align-items:center}
