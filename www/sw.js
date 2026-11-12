@@ -1,6 +1,6 @@
 // BibleVerse offline cache: app shell + logo/icons + the complete bundled Catholic Bible (all 73 books).
-const CACHE = "bibleverse-v8-webc";
-const SHELL = ["./", "index.html", "privacy.html", "style.css", "fonts.css", "app.js", "bible.js", "feed-rotation.js", "manifest.webmanifest", "data/books.json", "assets/logo.svg", "assets/icons/icon-192.png", "assets/icons/icon-512.png", "assets/icons/maskable-512.png", "assets/icons/apple-touch-icon.png", "assets/fonts/fraunces.woff2", "assets/fonts/fraunces-italic.woff2", "assets/fonts/newsreader.woff2", "assets/fonts/newsreader-italic.woff2", "assets/fonts/dm-sans.woff2", "assets/fonts/dm-sans-italic.woff2"];
+const CACHE = "bibleverse-v9-webc";
+const SHELL = ["./", "index.html", "privacy.html", "style.css", "fonts.css", "app.js", "bible.js", "feed-rotation.js", "pull-refresh.js", "manifest.webmanifest", "data/books.json", "assets/logo.svg", "assets/icons/icon-192.png", "assets/icons/icon-512.png", "assets/icons/maskable-512.png", "assets/icons/apple-touch-icon.png", "assets/fonts/fraunces.woff2", "assets/fonts/fraunces-italic.woff2", "assets/fonts/newsreader.woff2", "assets/fonts/newsreader-italic.woff2", "assets/fonts/dm-sans.woff2", "assets/fonts/dm-sans-italic.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {

@@ -78,6 +78,7 @@ export const VERSES = [...RAW, ...RAW2, ...RAW3].map((r,i)=>{ const [author, han
 
 import { initBible } from "./bible.js";
 import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
+import { createPullRefresh } from "./pull-refresh.js";
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
 let activeTopic = "All", reelIndex = 0, order = [...VERSES], reelPool = [...VERSES];
@@ -228,7 +229,13 @@ function switchView(name){
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
 $("#searchInput").addEventListener("input", renderDiscover);
 $("#clearFilterBtn").addEventListener("click",()=>{ activeTopic="All"; renderStories(); renderAll(); });
-$("#shuffleBtn").addEventListener("click",()=>{ for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
+function shuffleOrder(){ for(let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } }
+$("#shuffleBtn").addEventListener("click",()=>{ shuffleOrder(); renderAll(); switchView("feed"); showToast("Feed shuffled ⇄"); });
+createPullRefresh({
+  scroller: $("#scrollArea"), box: $("#pullRefresh"), pill: $("#pullPill"), icon: $("#pullIcon"), label: $("#pullText"),
+  canPull: () => !$("#view-feed").hidden,
+  onRefresh: () => { shuffleOrder(); renderAll(); },
+});
 $("#reelNextBtn").addEventListener("click",()=>{ reelIndex=(reelIndex+1)%reelPool.length; renderReel(); });
 $("#reelLikeBtn").addEventListener("click",()=>toggleLike(reelPool[reelIndex%reelPool.length].id, true));
 $("#newPostBtn").addEventListener("click",()=>switchView("reel"));
