@@ -3,7 +3,8 @@
 Source of truth: the app collects nothing. No account, no server, no analytics,
 no ads, no tracking, no third-party SDKs. Everything (likes, saves, comments,
 reading position, text size) stays in on-device storage. Reference:
-[privacy.html](../privacy.html) (host this file at your public privacy URL).
+[privacy.html](../privacy.html), hosted at `https://bibleverse.app/privacy`.
+Support: `https://bibleverse.app/support`.
 
 ## Apple App Store — App Privacy (App Store Connect)
 
@@ -43,4 +44,6 @@ location, contacts, microphone, photos, or notifications used).
 > no analytics, and no tracking. Likes, saves, comments, and reading position
 > are stored only on the device (localStorage) and can be verified in airplane
 > mode. Privacy policy is available in-app (Profile → Privacy Policy) and at
-> the public privacy URL: TODO — replace with hosted privacy.html URL.
+> https://bibleverse.app/privacy. Support is at https://bibleverse.app/support
+> and support@bibleverse.app. Android backup is disabled, so on-device notes
+> are not uploaded with device backup.

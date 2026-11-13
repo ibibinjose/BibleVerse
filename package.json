@@ -5,12 +5,13 @@
   "description": "BibleVerse — Christian daily Scripture companion for iOS & Android. Daily feed of named verses plus the full Catholic Bible in modern English, World English Bible Catholic Edition (73 books), bundled offline.",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test tests/*.mjs",
     "start": "npm run build:www && node server.js",
     "icons": "node scripts/make-icons.mjs",
     "build:bible": "node scripts/build-bible.mjs",
     "build:www": "node scripts/build-www.mjs",
     "build": "npm run build:www",
+    "deploy": "npm run build && wrangler pages deploy www --project-name bibleverse",
     "cap": "node -r ./scripts/cap-shim.cjs ./node_modules/@capacitor/cli/bin/capacitor",
     "sync": "npm run build:www && npm run cap -- sync",
     "ios": "npm run sync && npm run cap -- open ios",
@@ -18,10 +19,13 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.6.0"
+    "@capacitor/cli": "^8.6.0",
+    "wrangler": "^4.0.0"
   }
 }

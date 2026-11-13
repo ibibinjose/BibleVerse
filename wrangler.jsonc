@@ -1,0 +1,6 @@
+{
+  // Cloudflare Pages project. Static files only: no Worker script, KV, D1, or R2.
+  "name": "bibleverse",
+  "pages_build_output_dir": "./www",
+  "compatibility_date": "2026-11-13"
+}

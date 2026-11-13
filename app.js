@@ -309,14 +309,44 @@ function renderFeastSearch(){
     calY = y; calM = m; calSel = { y, m, d }; renderFeasts();
   }));
 }
-function switchView(name){
+const VIEWS = new Set(["feed","discover","reel","bible","saved","feasts","profile","about","privacy","support"]);
+const navStack = [];
+function viewFromLocation(){
+  const name = (location.hash || "").replace(/^#/, "");
+  return VIEWS.has(name) ? name : "feed";
+}
+function hashFor(name){
+  return name === "feed" ? location.pathname + location.search : location.pathname + location.search + "#" + name;
+}
+function switchView(name, opts = {}){
+  if(!VIEWS.has(name)) name = "feed";
   document.querySelectorAll(".view").forEach(v=>v.hidden = v.id !== "view-"+name);
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===name));
   $("#scrollArea").scrollTo({top:0});
   if(name==="reel") renderReel();
   if(name==="bible") bible.ensureLoaded();
   if(name==="feasts") renderFeasts();
+  if(opts.fromHistory) return;
+  if(opts.replace){
+    if(!navStack.length) navStack.push(name);
+    else navStack[navStack.length - 1] = name;
+    history.replaceState({ view: name }, "", hashFor(name));
+    return;
+  }
+  if(navStack[navStack.length - 1] === name) return;
+  navStack.push(name);
+  history.pushState({ view: name }, "", hashFor(name));
 }
+function goBack(fallback){
+  if(navStack.length > 1) history.back();
+  else switchView(fallback, { replace: true });
+}
+window.addEventListener("popstate", () => {
+  const name = viewFromLocation();
+  while(navStack.length > 1 && navStack[navStack.length - 1] !== name) navStack.pop();
+  if(navStack[navStack.length - 1] !== name) navStack.push(name);
+  switchView(name, { fromHistory: true });
+});
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
 $("#searchInput").addEventListener("input", renderDiscover);
 $("#feastSearch").addEventListener("input", renderFeastSearch);
@@ -339,17 +369,56 @@ $("#shareAppBtn").addEventListener("click",()=>shareApp());
 $("#wordmarkBtn").addEventListener("click",()=>switchView("profile"));
 $("#profileShareBtn").addEventListener("click",()=>shareApp());
 $("#aboutBtn").addEventListener("click",()=>switchView("about"));
-$("#aboutBackBtn").addEventListener("click",()=>switchView("profile"));
+$("#aboutBackBtn").addEventListener("click",()=>goBack("profile"));
 $("#privacyBtn").addEventListener("click",()=>switchView("privacy"));
 $("#aboutPrivacyBtn").addEventListener("click",()=>switchView("privacy"));
-$("#privacyBackBtn").addEventListener("click",()=>switchView("profile"));
+$("#privacyBackBtn").addEventListener("click",()=>goBack("profile"));
+$("#supportBtn").addEventListener("click",()=>switchView("support"));
+$("#supportBackBtn").addEventListener("click",()=>goBack("profile"));
 $("#aboutShareBtn").addEventListener("click",()=>shareApp());
 $("#aboutCopyBtn").addEventListener("click",()=>shareApp(true));
-if(window.Capacitor?.isNativePlatform?.())document.body.classList.add("native");
+function openExternal(url){
+  const browser = window.Capacitor?.Plugins?.Browser;
+  if(browser?.open){ browser.open({ url }).catch(()=>{}); return; }
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+function wireNativeShell(){
+  const cap = window.Capacitor;
+  if(!cap?.isNativePlatform?.()) return;
+  document.body.classList.add("native");
+  cap.Plugins?.SystemBars?.setStyle?.({ style: "LIGHT" })?.catch?.(()=>{});
+  const app = cap.Plugins?.App;
+  app?.addListener?.("backButton", () => {
+    if(navStack.length > 1) history.back();
+    else app.exitApp();
+  });
+  document.addEventListener("click", (event) => {
+    const a = event.target.closest?.("a[href]");
+    if(!a) return;
+    const href = a.getAttribute("href") || "";
+    if(!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    let url;
+    try { url = new URL(href, location.href); } catch { return; }
+    if(url.protocol !== "http:" && url.protocol !== "https:") return;
+    if(url.origin === location.origin) return;
+    event.preventDefault();
+    openExternal(url.href);
+  });
+}
+wireNativeShell();
 $("#scrollArea").addEventListener("scroll",e=>{ document.querySelector(".appbar").classList.toggle("scrolled", e.target.scrollTop>8); },{passive:true});
 function tickClock(){ const d=new Date(); $("#clock").textContent=d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}).replace(/\s?[AP]M/i,""); }
 tickClock(); setInterval(tickClock, 20000);
-renderStories(); renderAll(); renderFeasts();
+const startView = viewFromLocation();
+navStack.push(startView);
+history.replaceState({ view: startView }, "", hashFor(startView));
+if(startView !== "feed") switchView(startView, { fromHistory: true });
+renderStories();
+renderFeed();
+updateBadges();
+const paintRest = () => { renderSaved(); renderDiscover(); renderProfile(); renderReel(); renderFeasts(); };
+if (startView === "feed" && typeof requestAnimationFrame === "function") requestAnimationFrame(paintRest);
+else paintRest();
 // Web/PWA offline: cache shell + full Bible. Native (Capacitor) apps already
 // carry every file in the bundle, so skip the service worker there.
 if ("serviceWorker" in navigator && !window.Capacitor?.isNativePlatform?.()) {

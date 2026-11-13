@@ -7,7 +7,7 @@ try {
   await rm(fileURLToPath(www), { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
 } catch {}
 await mkdir(www, { recursive: true });
-for (const f of ["index.html", "privacy.html", "style.css", "fonts.css", "app.js", "bible.js", "feed-rotation.js", "pull-refresh.js", "feasts.js", "sw.js", "manifest.webmanifest", "robots.txt", "sitemap.xml"]) {
+for (const f of ["index.html", "privacy.html", "support.html", "style.css", "fonts.css", "app.js", "bible.js", "feed-rotation.js", "pull-refresh.js", "feasts.js", "sw.js", "manifest.webmanifest", "robots.txt", "sitemap.xml"]) {
   await cp(new URL(f, root), new URL(f, www), { force: true });
 }
 await cp(new URL("data", root), new URL("data", www), { recursive: true, force: true });
