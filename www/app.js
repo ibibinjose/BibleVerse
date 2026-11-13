@@ -181,7 +181,7 @@ function renderAll(){ renderFeed(); renderSaved(); renderDiscover(); renderProfi
 function toggleLike(id, burst=false){ const was=liked.has(id); was?liked.delete(id):liked.add(id); persistAll(); renderAll(); if(!was&&burst) popBurst(); if(!was) showToast("Liked ♥"); }
 function toggleSave(id){ const was=saved.has(id); was?saved.delete(id):saved.add(id); persistAll(); renderAll(); showToast(was?"Removed from Saved":"Saved 🔖 Find it in the ♥ tab"); }
 async function shareVerse(id){ const v=VERSES.find(x=>x.id===id); const text=`${v.name} — “${v.verse}” ${v.ref}`; if(navigator.share){ try{ await navigator.share({title:v.name,text}); return; }catch{} } try{ await navigator.clipboard.writeText(text); showToast("Verse copied — paste to share"); }catch{ showToast(text); } }
-function appInviteText(){ return "BibleVerse — a Christian companion for daily Scripture. A daily feed of named verses to pray with, plus the full Catholic Bible in modern English (73 books, World English Bible Catholic Edition) — readable fully offline: https://bibleverse.app/"; }
+function appInviteText(){ return "BibleVerse — a Christian companion for daily Scripture. A daily feed of named verses to pray with, plus the full Catholic Bible in modern English (73 books, World English Bible Catholic Edition) — readable fully offline: https://bibleverse-bg9.pages.dev/"; }
 async function shareApp(copyOnly=false){
   const text = appInviteText();
   const url = /^https?:/.test(location.href) ? location.href : undefined;

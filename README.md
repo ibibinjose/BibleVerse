@@ -34,6 +34,8 @@ npm start          # builds www/ and serves it at http://127.0.0.1:5173
 
 ## Host on Cloudflare Pages (free)
 
+The public origin lives in [`site.json`](site.json) (`url`). The build stamps it into canonical links, Open Graph and Twitter cards, the sitemap, and the share invite. It is `https://bibleverse-bg9.pages.dev` until you attach a custom domain — change that one value, then rebuild.
+
 The site is static. `npm run build` copies the web app into `www/` (no env vars). Deploy that folder to Pages:
 
 ```bash
