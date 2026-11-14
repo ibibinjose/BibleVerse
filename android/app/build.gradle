@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+def keystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+def keyAliasEnv = System.getenv("ANDROID_KEY_ALIAS")
+def keyPasswordEnv = System.getenv("ANDROID_KEY_PASSWORD")
+def hasReleaseKey = keystorePath && keystorePassword && keyAliasEnv && keyPasswordEnv
+
 android {
     namespace = "com.bibleverse.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,9 +22,22 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (hasReleaseKey) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keyAliasEnv
+                keyPassword keyPasswordEnv
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            if (hasReleaseKey) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

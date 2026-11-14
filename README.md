@@ -20,15 +20,47 @@ Verses in the Feed are short named cards ("Light in the Darkness", "Peace That G
 
 ## Privacy & store submission
 
-- **Privacy:** the app collects nothing — no account, no server, no analytics, no ads, no tracking. Full policy in [`privacy.html`](privacy.html) (host it as your public privacy URL) and in-app under Profile → Privacy Policy. iOS ships a [`PrivacyInfo.xcprivacy`](ios/App/App/PrivacyInfo.xcprivacy) manifest (no tracking, no collected data types).
+- **Privacy:** the app collects nothing — no account, no server, no analytics, no ads, no tracking. Full policy in [`privacy.html`](privacy.html), served at `/privacy`, and in-app under Profile → Privacy Policy. Support is [`support.html`](support.html) at `/support`. iOS ships a [`PrivacyInfo.xcprivacy`](ios/App/App/PrivacyInfo.xcprivacy) manifest (no tracking, no collected data types).
 - **Questionnaires:** copy-paste answers for Apple App Privacy and Google Play Data safety in [`store/privacy-answers.md`](store/privacy-answers.md) (both: no data collected or shared).
-- **Category & listing:** App Store primary **Reference** (secondary Education), age **4+**; Google Play **Books & Reference**, rating **Everyone**. Descriptions, keywords, and the pre-submit checklist live in [`store/store-listing.md`](store/store-listing.md).
+- **Category & listing:** App Store primary **Reference** (secondary Education), age **4+**; Google Play **Books & Reference**, rating **Everyone**. Descriptions, keywords, the screenshot plan, and the pre-submit checklist live in [`store/`](store/).
 
 ## Develop (web preview)
 
 ```bash
 npm start          # builds www/ and serves it at http://127.0.0.1:5173
 ```
+
+`/privacy` and `/support` are the public pages the stores ask for. Unknown paths serve `index.html`, same as Cloudflare Pages.
+
+## Host on Cloudflare Pages (free)
+
+The product plan, including Plus pricing and what stays free, is in [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md). Purchases stay off until `plusEnabled` is true in `site.json`.
+
+The public origin lives in [`site.json`](site.json) (`url`). The build stamps it into canonical links, Open Graph and Twitter cards, the sitemap, and the share invite. It is `https://bibleverse-bg9.pages.dev` until you attach a custom domain — change that one value, then rebuild.
+
+The site is static. `npm run build` copies the web app into `www/` (no env vars). Deploy that folder to Pages:
+
+```bash
+npm run deploy
+# npm run build && wrangler pages deploy www --project-name bibleverse
+```
+
+Wrangler needs `CLOUDFLARE_API_TOKEN` (Account / Cloudflare Pages / Edit) and `CLOUDFLARE_ACCOUNT_ID` in the environment. The running site needs no secrets. In the Pages dashboard, the build command is `npm run build` and the output directory is `www`. There is no `404.html`, so Pages serves `index.html` for unknown paths. `privacy.html` and `support.html` are also available at `/privacy` and `/support`.
+
+Point `bibleverse.app` at the Pages project when you are ready. Custom domains on the free plan do not require Workers Paid, KV, or D1. This app uses none of those.
+
+## What you still do by hand for the stores
+
+The repo cannot create these accounts or upload the binaries.
+
+1. **Apple Developer Program** (paid membership) and **Google Play Console** (one-time registration). Confirm the Xcode development team already in the project is the team you will ship with.
+2. **Mailbox** `support@bibleverse.app`, and DNS for `bibleverse.app` so the privacy and support URLs above resolve.
+3. **Cloudflare:** create an API token and set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, then `npm run deploy`. Enter the live URLs in both consoles.
+4. **Android upload key:** create a keystore and add these GitHub Actions secrets (values never go in git): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. Without them, CI still builds an unsigned release AAB. Play requires the signed one. Enroll in Play App Signing.
+5. **iOS signing:** CI archives with code signing off. To upload, sign in Xcode (or add `APPLE_TEAM_ID`, `APPLE_CERTIFICATE_P12_BASE64`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_PROVISIONING_PROFILE_BASE64`). App Store Connect also needs an API key if you upload from CI later: `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY`.
+6. **Screenshots and questionnaires:** follow [`store/screenshots.md`](store/screenshots.md) and paste the answers in [`store/privacy-answers.md`](store/privacy-answers.md). Upload the signed AAB and the signed iOS build yourself.
+
+Bundle id is `com.bibleverse.app` on both platforms. Keep it unless you have not created the store listings yet and deliberately want a different id.
 
 ## Build the native apps
 

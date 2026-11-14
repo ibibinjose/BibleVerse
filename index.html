@@ -3,28 +3,37 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<script>
+try {
+  var choice = localStorage.getItem("bibleverse-theme");
+  var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = choice === "light" || choice === "dark" ? choice : (dark ? "dark" : "light");
+} catch (e) {}
+</script>
+<script>window.BIBLEVERSE_SITE=__SITE_CONFIG__;</script>
 <meta name="theme-color" content="#ffffff"/>
 <meta name="description" content="BibleVerse is a Christian companion for daily Scripture: a reflective feed of named Bible verses plus the complete Catholic Bible in modern English (World English Bible Catholic Edition) — 73 books, searchable and readable offline on iOS & Android."/>
 <meta name="keywords" content="catholic bible, world english bible catholic, daily bible verse, verse of the day, bible offline, scripture app, christian devotional, bible study, psalms, gospels, daily scripture"/>
 <meta name="author" content="BibleVerse"/>
 <meta name="robots" content="index, follow"/>
-<link rel="canonical" href="https://bibleverse.app/"/>
+<link rel="canonical" href="__SITE_URL__/"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="BibleVerse"/>
 <meta property="og:title" content="BibleVerse — Daily Bible Verses & Full Catholic Bible (Offline)"/>
-<meta property="og:description" content="A Christian companion for daily Scripture. A daily feed of named verses to pray with, plus the complete Catholic Bible (73 books, World English Bible Catholic Edition) — readable fully offline."/>
-<meta property="og:url" content="https://bibleverse.app/"/>
-<meta property="og:image" content="https://bibleverse.app/assets/icons/icon-512.png"/>
-<meta property="og:image:alt" content="BibleVerse — open book with a star, gold on near-black"/>
+<meta property="og:description" content="Daily Bible verses and the full Catholic Bible in modern English (73 books), readable offline."/>
+<meta property="og:url" content="__SITE_URL__/"/>
+<meta property="og:image" content="__SITE_URL__/og-image.png"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="BibleVerse — daily Bible verses and the full Catholic Bible, offline"/>
 <meta property="og:locale" content="en_US"/>
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="BibleVerse — Daily Bible Verses & Full Catholic Bible (Offline)"/>
-<meta name="twitter:description" content="Every verse has a name. Daily verses to pray with + the full Catholic Bible in modern English (73 books, WEBC), readable offline."/>
-<meta name="twitter:image" content="https://bibleverse.app/assets/icons/icon-512.png"/>
+<meta name="twitter:description" content="Daily Bible verses and the full Catholic Bible in modern English, readable offline."/>
+<meta name="twitter:image" content="__SITE_URL__/og-image.png"/>
+<meta name="twitter:image:alt" content="BibleVerse — daily Bible verses and the full Catholic Bible, offline"/>
 <meta name="application-name" content="BibleVerse"/>
-<link rel="preload" href="assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin/>
-<link rel="preload" href="assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin/>
-<link rel="preload" href="assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -33,16 +42,83 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"MobileApplication","name":"BibleVerse","applicationId":"com.bibleverse.app","operatingSystem":["iOS","Android"],"applicationCategory":"ReferenceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A Christian companion for daily Scripture: a reflective feed of named Bible verses plus the complete Catholic Bible in modern English, World English Bible Catholic Edition (73 books), readable fully offline. Private by design — no account, no ads, no tracking."},
-{"@type":"WebSite","name":"BibleVerse","url":"https://bibleverse.app/","description":"Daily Bible verses to pray with and the full Catholic Bible in modern English (WEBC), readable offline.","potentialAction":{"@type":"SearchAction","target":"https://bibleverse.app/?q={search_term_string}","query-input":"required name=search_term_string"}}
+{"@type":"WebSite","name":"BibleVerse","url":"__SITE_URL__/","description":"Daily Bible verses to pray with and the full Catholic Bible in modern English (WEBC), readable offline.","potentialAction":{"@type":"SearchAction","target":"__SITE_URL__/?q={search_term_string}","query-input":"required name=search_term_string"}}
 ]}
 </script>
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg"/>
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png"/>
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png"/>
-<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png"/>
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" sizes="180x180"/>
 <link rel="manifest" href="manifest.webmanifest"/>
-<link rel="stylesheet" href="fonts.css"/>
-<link rel="stylesheet" href="style.css"/>
+<link rel="preload" href="assets/fonts/newsreader-400.woff2" as="font" type="font/woff2" crossorigin/>
+<link rel="preload" href="assets/fonts/fraunces-900.woff2" as="font" type="font/woff2" crossorigin/>
+<style>
+  @font-face{font-family:"DM Sans Fallback";src:local("Arial");size-adjust:101.5%;ascent-override:97.7%;descent-override:30.5%;line-gap-override:0%}
+  @font-face{font-family:"Fraunces Fallback";src:local("Georgia");size-adjust:100.4%;ascent-override:97.4%;descent-override:25.4%;line-gap-override:0%}
+  @font-face{font-family:"Newsreader Fallback";src:local("Georgia");size-adjust:88.8%;ascent-override:82.8%;descent-override:29.8%;line-gap-override:0%}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#0a0a0a;color:#fff;font-family:"DM Sans","DM Sans Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  button{font:inherit;background:none;border:0;color:inherit;padding:0}
+  input,textarea{font:inherit}
+  .stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;gap:56px;padding:28px 20px}
+  .side{max-width:400px;display:block}
+  .phone{position:relative;width:min(430px,100vw);height:min(932px,100dvh);background:#fff;color:#000;display:flex;flex-direction:column;overflow:hidden;flex:none}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 22px 4px;font-size:14px;font-weight:700;background:#fff;flex:none}
+  .home-indicator{width:134px;height:5px;border-radius:99px;background:#000;margin:6px auto 7px;flex:none}
+  @media(min-width:900px){.phone{border-radius:44px;border:10px solid #1a1a1a;height:min(880px,calc(100dvh - 40px))}}
+  @media(max-width:899px){.stage{padding:0;gap:0}.side{display:none}.phone{width:100vw;height:100dvh;border:0}.statusbar,.home-indicator,.notch{display:none}}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 10px;border-bottom:1px solid #dbdbdb;background:#fff;flex:none}
+  .wordmark{font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:22px;letter-spacing:-.03em;display:inline-flex;align-items:center;color:#000}
+  .brand-mark.sm{width:27px;height:27px;margin-right:7px}
+  .appbar-actions{display:flex;gap:12px;align-items:center}
+  .icon-btn{width:26px;height:26px}
+  .icon-btn svg{width:26px;height:26px;display:block}
+  .scroll{flex:1;overflow-y:auto;background:#fff}
+  .view{padding-bottom:14px}
+  .searchbar{display:flex;align-items:center;gap:8px;background:#efefef;border-radius:10px;margin:8px 16px 10px;padding:9px 12px;min-height:40px}
+  .header-search{margin:0 12px 8px}
+  .header-search-wrap{background:#fff;flex:none}
+  .searchbar input{flex:1;border:0;outline:0;background:transparent;font-size:16px;color:#000;min-width:0}
+  .search-icon{width:16px;height:16px;flex:none}
+  .streak-chip{flex:none;background:#141311;color:#f6f1e6;font-weight:800;font-size:12px;border-radius:99px;padding:6px 10px;min-height:28px;line-height:1}
+  .stories{display:flex;gap:16px;overflow:hidden;padding:12px 16px 10px;min-height:108px;border-bottom:1px solid #efefef}
+  .post{border-bottom:1px solid #efefef;padding-bottom:14px}
+  .post-head{display:flex;align-items:center;gap:10px;padding:10px 12px;min-height:56px}
+  .avatar{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px}
+  .post-user{flex:1;min-width:0;line-height:1.2}
+  .media{position:relative;aspect-ratio:4/4.4;width:100%;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
+  .media-kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
+  .media-name{font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:clamp(32px,9.5vw,42px);line-height:1;letter-spacing:-.02em;margin:0 0 14px}
+  .media-verse{font-family:Newsreader,"Newsreader Fallback",Georgia,serif;font-size:clamp(19px,5.8vw,24px);line-height:1.45;margin:0}
+  .media-ref{margin-top:18px;display:inline-flex;align-self:flex-start;padding:7px 11px;border-radius:999px;font-size:12.5px;font-weight:800}
+  .actions{display:flex;align-items:center;gap:16px;padding:10px 12px 4px;min-height:47px}
+  .act{width:27px;height:27px;padding:0}
+  .act svg{width:27px;height:27px;display:block}
+  .caption{padding:4px 12px 0;font-size:13.5px;line-height:1.45}
+  .reflect{margin:12px 16px 8px;padding:22px 20px 18px;border-radius:22px;background:#1e3a2f;color:#f7f3ea}
+  .reflect-kicker{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff4cc}
+  .reflect-name{margin:0 0 12px;font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:clamp(32px,8vw,46px);line-height:.98;letter-spacing:-.03em;color:#fff8e8}
+  .reflect-verse{margin:0;font-family:Newsreader,"Newsreader Fallback",Georgia,serif;font-size:clamp(20px,5.2vw,26px);line-height:1.45}
+  .reflect-ref{display:inline-block;margin-top:14px;font-weight:800}
+  .reflect-prompt{margin:14px 0 0;line-height:1.5;color:#f3ead4}
+  .note-label{display:grid;gap:6px;margin-top:16px;font-size:13px;font-weight:700}
+  .verse-note{width:100%;min-height:78px;border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.14);color:#fff}
+  .reflect-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .ig-btn{background:#0a4ea3;color:#fff;font-weight:800;font-size:14px;padding:9px 18px;border-radius:10px}
+  .ig-btn.ghost{background:#efefef;color:#000}
+  .tabbar{flex:none;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 4px;border-top:1px solid #dbdbdb;background:#fff;min-height:56px}
+  .tab{width:48px;height:40px;display:grid;place-items:center}
+  .tab svg{width:26px;height:26px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .pull-refresh{height:0;overflow:visible}
+  html[data-theme="dark"] body{background:#050504}
+  html[data-theme="dark"] .phone,html[data-theme="dark"] .appbar,html[data-theme="dark"] .tabbar,html[data-theme="dark"] .scroll{background:#141311;color:#f6f1e6}
+  html[data-theme="dark"] .wordmark,html[data-theme="dark"] .icon-btn,html[data-theme="dark"] .tab{color:#f6f1e6}
+</style>
+<link rel="stylesheet" href="fonts.css" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="style.css" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="fonts.css"/><link rel="stylesheet" href="style.css"/></noscript>
 </head>
 <body>
 <div class="stage">
@@ -60,6 +136,7 @@
   </aside>
 
   <div class="phone" id="phone">
+    <h1 class="sr-only">BibleVerse — daily Bible verses and the full Catholic Bible</h1>
     <div class="notch" aria-hidden="true"></div>
     <div class="statusbar" aria-hidden="true">
       <span class="clock" id="clock">9:41</span>
@@ -71,31 +148,35 @@
     </div>
 
     <header class="appbar">
-      <button class="wordmark" id="wordmarkBtn" aria-label="Open profile and about"><img class="brand-mark sm" src="assets/logo.svg" alt=""/>BibleVerse</button>
+      <button class="wordmark" id="wordmarkBtn" aria-label="BibleVerse, open profile"><img class="brand-mark sm" src="assets/logo.svg" alt="" width="27" height="27"/>BibleVerse</button>
+      <button class="streak-chip" id="streakCard" type="button">Day 1</button>
       <div class="appbar-actions">
         <button class="icon-btn" id="newPostBtn" aria-label="Verse of the day">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>
         </button>
         <button class="icon-btn has-dot" id="notifBtn" aria-label="Saved">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg>
-          <span class="dot-badge" id="savedBadge">0</span>
+          <span class="dot-badge" id="savedBadge" hidden></span>
         </button>
         <button class="icon-btn" id="shareAppBtn" aria-label="Share app">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" stroke-linejoin="round"/></svg>
-          <span class="count-badge">3</span>
         </button>
       </div>
     </header>
+    <div class="header-search-wrap">
+      <label class="searchbar header-search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg><input id="homeSearch" type="search" placeholder="Search verses, the Bible, and feasts" aria-label="Search named verses, the full Bible, and feasts"/></label>
+    </div>
 
     <main class="scroll" id="scrollArea">
       <div class="pull-refresh" id="pullRefresh" aria-hidden="true"><span class="pull-pill" id="pullPill"><span class="pull-icon" id="pullIcon">↓</span><span id="pullText">Pull to refresh</span></span></div>
       <!-- FEED -->
       <section id="view-feed" class="view">
+        <div id="homeResults" hidden></div>
         <div class="stories" id="stories" aria-label="Topics"></div>
-        <div id="feed"></div>
+        <div id="feed">__FEED_CARD__</div>
         <div id="feedEmpty" class="empty" hidden>
           <div class="empty-emoji">📖</div><h2>No verses here yet</h2>
-          <p>Try another story topic or search in Discover.</p>
+          <p>Try another topic.</p>
           <button class="ig-btn" id="clearFilterBtn">Show all verses</button>
         </div>
         <p class="feed-end">✦ &nbsp;You're all caught up&nbsp; ✦<br><span>You've seen every named verse for now.</span></p>
@@ -103,7 +184,16 @@
 
       <!-- DISCOVER -->
       <section id="view-discover" class="view" hidden>
-        <label class="searchbar"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg><input id="searchInput" type="search" placeholder="Search by name, topic, or reference — e.g. peace, Psalm 23…" aria-label="Search daily verses by name, topic, or Bible reference"/></label>
+        <div id="todayHost"></div>
+        <section id="plans" aria-label="Reading plans"></section>
+        <section class="reminder" id="reminder">
+          <h2 class="view-title">Daily reminder</h2>
+          <p class="view-sub" id="reminderHelp">Choose a time. The installed iPhone and Android app delivers the alert. This page only remembers it.</p>
+          <div class="reflect-actions">
+            <input id="reminderTime" type="time" value="08:00" aria-label="Reminder time"/>
+            <button class="ig-btn" id="reminderSave" type="button">Save reminder</button>
+          </div>
+        </section>
         <div class="chips" id="topicChips"></div>
         <div class="grid" id="discoverGrid"></div>
         <p class="grid-empty" id="gridEmpty" hidden>No verse matches that search.</p>
@@ -149,6 +239,8 @@
           <div class="selected-bar" id="selectedBar" hidden>
             <span id="selectedRef">John 1:5</span>
             <button id="selectedCopyBtn">Copy</button>
+            <button id="selectedHighlightBtn">Highlight</button>
+            <button id="selectedCardBtn">Card</button>
             <button id="selectedShareBtn">Share</button>
           </div>
           <div class="reader-nav">
@@ -171,10 +263,10 @@
 
       <!-- SAVED -->
       <section id="view-saved" class="view" hidden>
-        <h2 class="view-title">Saved</h2>
-        <p class="view-sub">Only on this device. Tap the bookmark on any post to remove it.</p>
+        <h2 class="view-title">Favourites</h2>
+        <p class="view-sub">Only on this device. Tap the bookmark on a verse to keep it here.</p>
         <div id="savedFeed"></div>
-        <div class="empty" id="savedEmpty"><div class="empty-emoji">🔖</div><h2>Nothing saved yet</h2><p>Tap the bookmark on a verse and it will live here.</p></div>
+        <div class="empty" id="savedEmpty"><div class="empty-emoji">🔖</div><h2>No favourites yet</h2><p>Tap the bookmark on a verse and it will live here.</p></div>
       </section>
 
       <!-- FEASTS & SAINTS -->
@@ -192,7 +284,13 @@
           <button class="cal-nav" id="calNextBtn" aria-label="Next month">›</button>
         </div>
         <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-legend"><span><i style="background:#c62828"></i>Sunday</span><span><i style="background:#b45309"></i>Solemnity</span><span><i style="background:#0095f6"></i>Feast</span><span><i style="background:#16a34a"></i>Memorial</span><span><i style="background:#9ca3af"></i>Optional</span></div>
+        <div class="cal-legend">
+          <button type="button" data-rank-info="Sunday"><i style="background:#c62828"></i>Sunday</button>
+          <button type="button" data-rank-info="Solemnity"><i style="background:#b45309"></i>Solemnity</button>
+          <button type="button" data-rank-info="Feast"><i style="background:#0095f6"></i>Feast</button>
+          <button type="button" data-rank-info="Memorial"><i style="background:#16a34a"></i>Memorial</button>
+          <button type="button" data-rank-info="Optional"><i style="background:#9ca3af"></i>Optional</button>
+        </div>
         <div id="feastDetail"></div>
         <h3 class="view-subtitle">Upcoming</h3>
         <div id="feastUpcoming"></div>
@@ -203,16 +301,20 @@
         <div class="profile-head">
           <div class="profile-avatar"><img src="assets/logo.svg" alt="BibleVerse logo"/></div>
           <div class="profile-stats">
-            <div><b id="statPosts">50</b><span>posts</span></div>
-            <div><b id="statLiked">0</b><span>liked</span></div>
-            <div><b id="statSaved2">0</b><span>saved</span></div>
+            <div><b id="statSaved2">0</b><span>favourites</span></div>
+            <div><b id="statLiked">0</b><span>days read</span></div>
+            <div><b id="streakStat">1</b><span>day streak</span></div>
           </div>
         </div>
         <p class="profile-name">BibleVerse <svg class="verified" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#0095f6"/><path d="M10.7 15.3l-3.2-3.2 1.5-1.5 1.7 1.7 5.7-5.7 1.5 1.5z" fill="#fff"/></svg></p>
         <p class="profile-bio">Every verse has a name. ✦<br>A verse a day to pray with — read, save, and share.</p>
+        <p class="profile-streak" id="profileStreak">Day 1 streak</p>
         <div class="profile-actions"><button class="ig-btn" id="shuffleBtn">Shuffle feed</button><button class="ig-btn ghost" id="profileShareBtn">Share app</button></div>
+        <button class="about-open" id="themeBtn">Appearance<span id="themeValue">System</span></button>
+        <button class="about-open" id="plusBtn">BibleVerse Plus<span>›</span></button>
         <button class="about-open" id="aboutBtn">About this app<span>›</span></button>
         <button class="about-open" id="privacyBtn">Privacy Policy<span>›</span></button>
+        <button class="about-open" id="supportBtn">Support<span>›</span></button>
         <div class="grid" id="profileGrid"></div>
         <p class="version-foot">BibleVerse 1.0.0 · Full Catholic Bible inside · Works offline</p>
       </section>
@@ -253,9 +355,45 @@
             <li><b>On your device only</b><span>Likes, saves, comments, your reading position, and text-size preference live in private on-device storage. Deleting the app removes them permanently.</span></li>
             <li><b>Sharing is yours</b><span>Share opens your device's share sheet or copies text. What you share goes only where you send it — we receive and store nothing.</span></li>
             <li><b>Children</b><span>We collect no data from anyone, including children.</span></li>
-            <li><b>Contact</b><span>Questions: support@bibleverse.app. The full policy is also published at our public privacy URL (see store listing).</span></li>
+            <li><b>Contact</b><span>Questions: <a href="mailto:support@bibleverse.app">support@bibleverse.app</a>. The public policy is at <a href="__SITE_URL__/privacy">__SITE_URL__/privacy</a>. Help is at <a href="__SITE_URL__/support">__SITE_URL__/support</a>.</span></li>
           </ul>
           <p class="version-foot">BibleVerse 1.0.0 · Private by design · Works offline</p>
+        </div>
+      </section>
+
+      <!-- SUPPORT -->
+      <section id="view-support" class="view" hidden>
+        <div class="about-wrap">
+          <button class="reader-back" id="supportBackBtn">‹ Profile</button>
+          <h2 class="view-title about-title">Support</h2>
+          <p class="view-sub about-tag">No account needed</p>
+          <p class="about-copy">Email <a href="mailto:support@bibleverse.app">support@bibleverse.app</a> and include your device, the app version at the bottom of Profile, and what you expected to happen.</p>
+          <ul class="about-list">
+            <li><b>Your notes stay here</b><span>Likes, saves, comments, and your reading place are stored only on this device. Removing the app deletes them.</span></li>
+            <li><b>Works offline</b><span>The Bible is inside the app. You do not sign in, and there is no password to reset.</span></li>
+            <li><b>Privacy</b><span>Nothing is collected. The public policy is at <a href="__SITE_URL__/privacy">__SITE_URL__/privacy</a>.</span></li>
+          </ul>
+          <p class="version-foot">BibleVerse 1.0.0 · support@bibleverse.app</p>
+        </div>
+      </section>
+
+      <!-- PLUS (payments stay off until site.json enables them) -->
+      <section id="view-plus" class="view" hidden>
+        <div class="about-wrap">
+          <button class="reader-back" id="plusBackBtn">‹ Profile</button>
+          <h2 class="view-title about-title">BibleVerse Plus</h2>
+          <p class="view-sub about-tag">The Bible stays free.</p>
+          <p class="about-copy">The full text, today’s verse, favourites, highlights, and the streak stay free and offline. Plus is for reading plans, audio, extra card themes, and sync — when purchases are turned on.</p>
+          <ul class="about-list">
+            <li><b>United States</b><span>US $4.99 a month, or US $39.99 a year.</span></li>
+            <li><b>Australia</b><span>A $7.99 a month, or A $59.99 a year.</span></li>
+            <li><b>On this phone</b><span id="plusStatus">Purchases are not turned on. Nothing will be charged.</span></li>
+          </ul>
+          <div class="about-share">
+            <button class="ig-btn" id="plusBuyBtn" type="button" disabled>Purchases are not turned on</button>
+            <button class="ig-btn ghost" id="plusRestoreBtn" type="button">Restore purchases</button>
+          </div>
+          <p class="version-foot">Prices are the plan, not a live charge. iPhone and Android purchases will use the stores. The website will use its own checkout.</p>
         </div>
       </section>
     </main>
@@ -264,7 +402,7 @@
       <button class="tab active" data-view="feed" aria-label="Home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3l9-8Z"/></svg></button>
       <button class="tab" data-view="discover" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg></button>
       <button class="tab" data-view="bible" aria-label="Bible"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5.5C10.5 4 8.7 3.5 5 3.5c-.6 0-1 .4-1 1v13c0 .6.4 1 1 1 3.7 0 5.5.5 7 2 1.5-1.5 3.3-2 7-2 .6 0 1-.4 1-1v-13c0-.6-.4-1-1-1-3.7 0-5.5.5-7 2Zm0 0v15" stroke-linejoin="round"/></svg></button>
-      <button class="tab" data-view="saved" aria-label="Saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg><span class="tab-badge" id="tabSavedBadge" hidden>0</span></button>
+      <button class="tab" data-view="saved" aria-label="Favourites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg><span class="tab-badge" id="tabSavedBadge" hidden>0</span></button>
       <button class="tab" data-view="feasts" aria-label="Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4" stroke-linecap="round"/></svg><span class="tab-dot" id="tabFeastDot" hidden></span></button>
 
     </nav>
@@ -273,6 +411,25 @@
     <div id="burst" class="burst" aria-hidden="true">♥</div>
   </div>
 </div>
-<script type="module" src="app.js"></script>
+<dialog id="feastSheet" aria-labelledby="feastSheetTitle">
+  <p id="feastSheetRank" class="rank"></p>
+  <p id="feastSheetRankNote" class="sheet-note"></p>
+  <h2 id="feastSheetTitle"></h2>
+  <p id="feastSheetWhen"></p>
+  <p id="feastSheetSeason" class="sheet-season"></p>
+  <p id="feastSheetAbout"></p>
+  <p id="feastSheetObligation" hidden>✦ Holy Day of Obligation in the United States.</p>
+  <div id="feastSheetLinks">
+    <h3>Read more</h3>
+    <ul>
+      <li><a id="feastLinkVatican" target="_blank" rel="noopener noreferrer">Vatican News</a></li>
+      <li><a id="feastLinkWiki" target="_blank" rel="noopener noreferrer">Wikipedia</a></li>
+      <li><a id="feastLinkGrok" target="_blank" rel="noopener noreferrer">Grokipedia</a></li>
+    </ul>
+    <p class="sheet-note">These pages need a connection. The calendar itself stays on this device.</p>
+  </div>
+  <form method="dialog"><button class="ig-btn" value="close">Close</button></form>
+</dialog>
+<script type="module" async src="app.js"></script>
 </body>
 </html>
