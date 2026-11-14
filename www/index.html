@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<script>
+try {
+  var choice = localStorage.getItem("bibleverse-theme");
+  var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = choice === "light" || choice === "dark" ? choice : (dark ? "dark" : "light");
+} catch (e) {}
+</script>
+<script>window.BIBLEVERSE_SITE={"url":"https://bibleverse-bg9.pages.dev","plusEnabled":false,"analyticsToken":"","revenueCatAppleApiKey":"","revenueCatGoogleApiKey":"","revenueCatWebApiKey":"","revenueCatEntitlementId":"plus"};</script>
 <meta name="theme-color" content="#ffffff"/>
 <meta name="description" content="BibleVerse is a Christian companion for daily Scripture: a reflective feed of named Bible verses plus the complete Catholic Bible in modern English (World English Bible Catholic Edition) — 73 books, searchable and readable offline on iOS & Android."/>
 <meta name="keywords" content="catholic bible, world english bible catholic, daily bible verse, verse of the day, bible offline, scripture app, christian devotional, bible study, psalms, gospels, daily scripture"/>
@@ -87,7 +95,6 @@
         </button>
         <button class="icon-btn" id="shareAppBtn" aria-label="Share app">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" stroke-linejoin="round"/></svg>
-          <span class="count-badge">3</span>
         </button>
       </div>
     </header>
@@ -96,6 +103,7 @@
       <div class="pull-refresh" id="pullRefresh" aria-hidden="true"><span class="pull-pill" id="pullPill"><span class="pull-icon" id="pullIcon">↓</span><span id="pullText">Pull to refresh</span></span></div>
       <!-- FEED -->
       <section id="view-feed" class="view">
+        <button class="streak-card" id="streakCard" type="button">Day 1 · today's verse</button>
         <div class="stories" id="stories" aria-label="Topics"></div>
         <div id="feed"></div>
         <div id="feedEmpty" class="empty" hidden>
@@ -154,6 +162,8 @@
           <div class="selected-bar" id="selectedBar" hidden>
             <span id="selectedRef">John 1:5</span>
             <button id="selectedCopyBtn">Copy</button>
+            <button id="selectedHighlightBtn">Highlight</button>
+            <button id="selectedCardBtn">Card</button>
             <button id="selectedShareBtn">Share</button>
           </div>
           <div class="reader-nav">
@@ -176,10 +186,10 @@
 
       <!-- SAVED -->
       <section id="view-saved" class="view" hidden>
-        <h2 class="view-title">Saved</h2>
-        <p class="view-sub">Only on this device. Tap the bookmark on any post to remove it.</p>
+        <h2 class="view-title">Favourites</h2>
+        <p class="view-sub">Only on this device. Tap the bookmark on a verse to keep it here.</p>
         <div id="savedFeed"></div>
-        <div class="empty" id="savedEmpty"><div class="empty-emoji">🔖</div><h2>Nothing saved yet</h2><p>Tap the bookmark on a verse and it will live here.</p></div>
+        <div class="empty" id="savedEmpty"><div class="empty-emoji">🔖</div><h2>No favourites yet</h2><p>Tap the bookmark on a verse and it will live here.</p></div>
       </section>
 
       <!-- FEASTS & SAINTS -->
@@ -210,12 +220,15 @@
           <div class="profile-stats">
             <div><b id="statPosts">50</b><span>posts</span></div>
             <div><b id="statLiked">0</b><span>liked</span></div>
-            <div><b id="statSaved2">0</b><span>saved</span></div>
+            <div><b id="statSaved2">0</b><span>favourites</span></div>
           </div>
         </div>
         <p class="profile-name">BibleVerse <svg class="verified" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#0095f6"/><path d="M10.7 15.3l-3.2-3.2 1.5-1.5 1.7 1.7 5.7-5.7 1.5 1.5z" fill="#fff"/></svg></p>
         <p class="profile-bio">Every verse has a name. ✦<br>A verse a day to pray with — read, save, and share.</p>
+        <p class="profile-streak" id="profileStreak">Day 1 streak</p>
         <div class="profile-actions"><button class="ig-btn" id="shuffleBtn">Shuffle feed</button><button class="ig-btn ghost" id="profileShareBtn">Share app</button></div>
+        <button class="about-open" id="themeBtn">Appearance<span id="themeValue">System</span></button>
+        <button class="about-open" id="plusBtn">BibleVerse Plus<span>›</span></button>
         <button class="about-open" id="aboutBtn">About this app<span>›</span></button>
         <button class="about-open" id="privacyBtn">Privacy Policy<span>›</span></button>
         <button class="about-open" id="supportBtn">Support<span>›</span></button>
@@ -280,13 +293,33 @@
           <p class="version-foot">BibleVerse 1.0.0 · support@bibleverse.app</p>
         </div>
       </section>
+
+      <!-- PLUS (payments stay off until site.json enables them) -->
+      <section id="view-plus" class="view" hidden>
+        <div class="about-wrap">
+          <button class="reader-back" id="plusBackBtn">‹ Profile</button>
+          <h2 class="view-title about-title">BibleVerse Plus</h2>
+          <p class="view-sub about-tag">The Bible stays free.</p>
+          <p class="about-copy">The full text, today’s verse, favourites, highlights, and the streak stay free and offline. Plus is for reading plans, audio, extra card themes, and sync — when purchases are turned on.</p>
+          <ul class="about-list">
+            <li><b>United States</b><span>US $4.99 a month, or US $39.99 a year.</span></li>
+            <li><b>Australia</b><span>A $7.99 a month, or A $59.99 a year.</span></li>
+            <li><b>On this phone</b><span id="plusStatus">Purchases are not turned on. Nothing will be charged.</span></li>
+          </ul>
+          <div class="about-share">
+            <button class="ig-btn" id="plusBuyBtn" type="button" disabled>Purchases are not turned on</button>
+            <button class="ig-btn ghost" id="plusRestoreBtn" type="button">Restore purchases</button>
+          </div>
+          <p class="version-foot">Prices are the plan, not a live charge. iPhone and Android purchases will use the stores. The website will use its own checkout.</p>
+        </div>
+      </section>
     </main>
 
     <nav class="tabbar" aria-label="Main">
       <button class="tab active" data-view="feed" aria-label="Home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-4v-6H10v6H6v-9H3l9-8Z"/></svg></button>
       <button class="tab" data-view="discover" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg></button>
       <button class="tab" data-view="bible" aria-label="Bible"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5.5C10.5 4 8.7 3.5 5 3.5c-.6 0-1 .4-1 1v13c0 .6.4 1 1 1 3.7 0 5.5.5 7 2 1.5-1.5 3.3-2 7-2 .6 0 1-.4 1-1v-13c0-.6-.4-1-1-1-3.7 0-5.5.5-7 2Zm0 0v15" stroke-linejoin="round"/></svg></button>
-      <button class="tab" data-view="saved" aria-label="Saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg><span class="tab-badge" id="tabSavedBadge" hidden>0</span></button>
+      <button class="tab" data-view="saved" aria-label="Favourites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg><span class="tab-badge" id="tabSavedBadge" hidden>0</span></button>
       <button class="tab" data-view="feasts" aria-label="Calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4" stroke-linecap="round"/></svg><span class="tab-dot" id="tabFeastDot" hidden></span></button>
 
     </nav>

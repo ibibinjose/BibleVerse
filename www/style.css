@@ -284,7 +284,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .verse-line{margin:0 0 10px;cursor:pointer;border-radius:8px;padding:4px 6px}
 .verse-line sup{font-family:"DM Sans",sans-serif;font-size:.62em;font-weight:800;color:#b45309;margin-right:6px}
 .verse-line.selected{background:#fef3c7}
-.selected-bar{position:sticky;bottom:8px;margin:8px 12px;background:#262626;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:4}
+.selected-bar{position:sticky;bottom:8px;margin:8px 12px;background:#262626;color:#fff;border-radius:12px;padding:10px 12px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:4}
 .selected-bar span{flex:1;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .selected-bar button{background:#fff;color:#000;font-weight:800;font-size:12.5px;padding:7px 11px;border-radius:8px}
 .reader-nav{display:flex;gap:8px;padding:10px 12px 4px}
@@ -292,6 +292,25 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .reader-nav .ig-btn:disabled{opacity:.35}
 .tab[data-view="bible"] svg{width:27px;height:27px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.view{animation:viewIn .22s ease}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view{animation:none}}
+.streak-card{display:flex;align-items:center;width:calc(100% - 32px);margin:12px 16px 0;padding:12px 14px;border-radius:14px;background:#141311;color:#f6f1e6;font-weight:800;text-align:left;letter-spacing:-.01em}
+.streak-card::before{content:"✦";color:#f5c542;margin-right:10px}
+.profile-streak{margin:0 16px 12px;font-weight:800;color:#b45309}
+.verse-line.highlighted{background:#fef3c7}
+html[data-theme="dark"] .verse-line.highlighted{background:#3f3a28;color:#f6f1e6}
+html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="dark"] body{background:#050504}
+html[data-theme="dark"] .phone{background:#141311;color:#f6f1e6}
+html[data-theme="dark"] .phone :is(.appbar,.tabbar,.scroll,.statusbar,.cal-head,.reader-head,.searchbar,.chip,.book-row,.feast-row,.up-row,.mass-card,.result-row,.seg,.empty,.about-open,.ig-btn.ghost,.add-comment input,.cal-day,.tile){border-color:#2c2924}
+html[data-theme="dark"] .phone :is(.appbar,.tabbar,.scroll,.statusbar,.cal-head,.reader-head){background:#141311;color:#f6f1e6}
+html[data-theme="dark"] .phone :is(.wordmark,.icon-btn,.tab,.post-user b,.post-user small,.caption,.likes,.view-title,.view-subtitle,.cal-day,.book-row,.book-main b,.feast-row,.up-row,.searchbar,.searchbar input,.add-comment input,.profile-name,.profile-bio,.empty,.empty h2,.seg-btn,.reader-title b,.verse-line,.result-row,.result-row b,.mass-card,.cal-head b,.about-open,.comment-row,.feed-end,.about-copy,.about-list b,.about-list span,.about-source,.view-sub,.version-foot,.reel-hint){color:#f6f1e6}
+html[data-theme="dark"] .phone :is(.searchbar,.chip,.about-open,.ig-btn.ghost,.seg,.book-row,.cal-nav){background:#1c1a17}
+html[data-theme="dark"] .phone .chip.active,.phone .seg-btn.active{background:#f5c542;color:#141311}
+html[data-theme="dark"] .phone .stories{border-bottom-color:#2c2924}
+html[data-theme="dark"] .phone .post{border-bottom-color:#2c2924}
+@media(max-width:899px){.statusbar,.home-indicator,.notch{display:none}}
 /* Web refinements — hover-capable devices get hover affordances, a visible
    scrollbar, and selectable verse text for copying. */
 ::selection{background:#fde68a}

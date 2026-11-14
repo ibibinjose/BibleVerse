@@ -79,6 +79,9 @@ export const VERSES = [...RAW, ...RAW2, ...RAW3].map((r,i)=>{ const [author, han
 import { initBible } from "./bible.js";
 import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
 import { createPullRefresh } from "./pull-refresh.js";
+import { recordStreak } from "./streak.js";
+import { purchaseAvailability, readEntitlement, siteConfig } from "./plus.js";
+import { shareVerseCard } from "./verse-card.js";
 import { feastsOn, upcomingFeasts, seasonOf, toDate, RANK_DOT, searchFeasts, massStats, key as feastKey } from "./feasts.js";
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
@@ -109,13 +112,11 @@ const ICONS = {
 
 function postHTML(v){
   const isLiked = liked.has(v.id), isSaved = saved.has(v.id), list = comments[v.id]||[];
-  const likes = v.baseLikes + (isLiked?1:0);
   return `<article class="post" data-id="${v.id}">
     <div class="post-head">
       <span class="avatar" style="background:${v.bg}">${esc(initials(v.author))}</span>
       <div class="post-user"><b>${esc(v.author)} ${ICONS.verified}</b><small>@${esc(v.handle)} · ${esc(v.ref)} · ${esc(v.topic)}</small></div>
-      <button class="follow-btn" data-follow="${v.id}">Follow</button>
-      <button class="more-btn" data-more="${v.id}" aria-label="More options">···</button>
+      <button class="more-btn" data-more="${v.id}" aria-label="Copy verse text">Copy</button>
     </div>
     <div class="media" data-dbl="${v.id}" style="background:${v.bg};color:${v.fg}" role="img" aria-label="${esc(v.name)} — ${esc(v.ref)}">
       <p class="media-kicker">${esc(v.topic)} · ${esc(v.book)}</p>
@@ -127,11 +128,11 @@ function postHTML(v){
     <div class="actions">
       <button class="act like-btn ${isLiked?"liked":""}" data-like="${v.id}" aria-label="Like">${ICONS.heart}</button>
       <button class="act" data-comment-focus="${v.id}" aria-label="Comment">${ICONS.comment}</button>
-      <button class="act" data-share="${v.id}" aria-label="Share">${ICONS.share}</button>
+      <button class="act" data-share="${v.id}" aria-label="Share verse card">${ICONS.share}</button>
       <span class="spacer"></span>
-      <button class="act save-btn ${isSaved?"saved":""}" data-save="${v.id}" aria-label="Save">${ICONS.bookmark}</button>
+      <button class="act save-btn ${isSaved?"saved":""}" data-save="${v.id}" aria-label="Favourite">${ICONS.bookmark}</button>
     </div>
-    <p class="likes">Liked by <b>daily.devotion</b> and <b>${fmt(likes)} others</b></p>
+    ${isLiked ? `<p class="likes">You like this verse</p>` : ""}
     <p class="caption"><b>@${esc(v.handle)}</b><span class="name-tag">${esc(v.name)} —</span> <span class="reflection-line">${esc(v.reflection)}</span></p>
     ${list.length?`<button class="comments-link" data-view-comments="${v.id}">View all ${list.length} comment${list.length>1?"s":""}</button><div class="comments">${list.slice(-2).map(c=>`<p class="comment-row"><b>you</b>${esc(c)}</p>`).join("")}</div>`:`<button class="comments-link" data-view-comments="${v.id}">Add a comment…</button>`}
     <div class="add-comment"><input data-comment-input="${v.id}" placeholder="Add a comment…" maxlength="140"/><button class="post-btn" data-post-comment="${v.id}" hidden>Post</button></div>
@@ -179,8 +180,18 @@ function updateBadges(){ $("#savedBadge").textContent=saved.size||""; const b=$(
 
 function renderAll(){ renderFeed(); renderSaved(); renderDiscover(); renderProfile(); renderReel(); updateBadges(); }
 function toggleLike(id, burst=false){ const was=liked.has(id); was?liked.delete(id):liked.add(id); persistAll(); renderAll(); if(!was&&burst) popBurst(); if(!was) showToast("Liked ♥"); }
-function toggleSave(id){ const was=saved.has(id); was?saved.delete(id):saved.add(id); persistAll(); renderAll(); showToast(was?"Removed from Saved":"Saved 🔖 Find it in the ♥ tab"); }
-async function shareVerse(id){ const v=VERSES.find(x=>x.id===id); const text=`${v.name} — “${v.verse}” ${v.ref}`; if(navigator.share){ try{ await navigator.share({title:v.name,text}); return; }catch{} } try{ await navigator.clipboard.writeText(text); showToast("Verse copied — paste to share"); }catch{ showToast(text); } }
+function toggleSave(id){ const was=saved.has(id); was?saved.delete(id):saved.add(id); persistAll(); renderAll(); showToast(was?"Removed from Favourites":"Saved to Favourites"); }
+async function shareVerse(id){
+  const v=VERSES.find(x=>x.id===id);
+  try {
+    const how = await shareVerseCard({ title: v.name, verse: v.verse, ref: v.ref, bg: v.bg, fg: v.fg });
+    showToast(how === "shared" ? "Verse card ready to send" : "Verse card saved to your downloads");
+  } catch {
+    const text=`${v.name} — “${v.verse}” ${v.ref}`;
+    try { await navigator.clipboard.writeText(text); showToast("Verse copied — paste to share"); } catch { showToast(text); }
+  }
+}
+function copyVerse(id){ const v=VERSES.find(x=>x.id===id); const text=`${v.name} — “${v.verse}” ${v.ref}`; navigator.clipboard?.writeText(text).then(()=>showToast("Verse copied"), ()=>showToast(text)); }
 function appInviteText(){ return "BibleVerse — a Christian companion for daily Scripture. A daily feed of named verses to pray with, plus the full Catholic Bible in modern English (73 books, World English Bible Catholic Edition) — readable fully offline: __SITE_URL__/"; }
 async function shareApp(copyOnly=false){
   const text = appInviteText();
@@ -199,7 +210,7 @@ function bindPosts(root){
   root.querySelectorAll("[data-save]").forEach(b=>b.addEventListener("click",()=>toggleSave(Number(b.dataset.save))));
   root.querySelectorAll("[data-share]").forEach(b=>b.addEventListener("click",()=>shareVerse(Number(b.dataset.share))));
   root.querySelectorAll("[data-follow]").forEach(b=>b.addEventListener("click",()=>{ const v=VERSES.find(x=>x.id===Number(b.dataset.follow)); b.textContent=b.textContent==="Follow"?"Following":"Follow"; showToast(b.textContent==="Following"?`Following @${v.handle}`:"Unfollowed"); }));
-  root.querySelectorAll("[data-more]").forEach(b=>b.addEventListener("click",()=>showToast("Saved verses live in the ♥ tab below")));
+  root.querySelectorAll("[data-more]").forEach(b=>b.addEventListener("click",()=>copyVerse(Number(b.dataset.more))));
   root.querySelectorAll("[data-comment-focus],[data-view-comments]").forEach(b=>b.addEventListener("click",()=>{ const id=b.dataset.commentFocus||b.dataset.viewComments; root.querySelector(`[data-comment-input="${id}"]`)?.focus(); }));
   root.querySelectorAll("[data-comment-input]").forEach(inp=>{
     const btn=root.querySelector(`[data-post-comment="${inp.dataset.commentInput}"]`);
@@ -309,7 +320,7 @@ function renderFeastSearch(){
     calY = y; calM = m; calSel = { y, m, d }; renderFeasts();
   }));
 }
-const VIEWS = new Set(["feed","discover","reel","bible","saved","feasts","profile","about","privacy","support"]);
+const VIEWS = new Set(["feed","discover","reel","bible","saved","feasts","profile","about","privacy","support","plus"]);
 const navStack = [];
 function viewFromLocation(){
   const name = (location.hash || "").replace(/^#/, "");
@@ -375,6 +386,12 @@ $("#aboutPrivacyBtn").addEventListener("click",()=>switchView("privacy"));
 $("#privacyBackBtn").addEventListener("click",()=>goBack("profile"));
 $("#supportBtn").addEventListener("click",()=>switchView("support"));
 $("#supportBackBtn").addEventListener("click",()=>goBack("profile"));
+$("#plusBtn").addEventListener("click",()=>{ renderPlus(); switchView("plus"); });
+$("#plusBackBtn").addEventListener("click",()=>goBack("profile"));
+$("#plusBuyBtn").addEventListener("click",()=>showToast("Purchases are not turned on"));
+$("#plusRestoreBtn").addEventListener("click",()=>showToast(readEntitlement(localStorage).active ? "Plus is already on this device" : "No purchases to restore"));
+$("#themeBtn").addEventListener("click", cycleTheme);
+$("#streakCard").addEventListener("click",()=>switchView("reel"));
 $("#aboutShareBtn").addEventListener("click",()=>shareApp());
 $("#aboutCopyBtn").addEventListener("click",()=>shareApp(true));
 function openExternal(url){
@@ -409,6 +426,57 @@ wireNativeShell();
 $("#scrollArea").addEventListener("scroll",e=>{ document.querySelector(".appbar").classList.toggle("scrolled", e.target.scrollTop>8); },{passive:true});
 function tickClock(){ const d=new Date(); $("#clock").textContent=d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}).replace(/\s?[AP]M/i,""); }
 tickClock(); setInterval(tickClock, 20000);
+const THEME_CYCLE = ["system", "light", "dark"];
+function resolvedTheme(choice){
+  if(choice === "light" || choice === "dark") return choice;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function applyTheme(choice){
+  document.documentElement.dataset.theme = resolvedTheme(choice);
+  const label = choice === "dark" ? "Dark" : choice === "light" ? "Light" : "System";
+  const node = $("#themeValue");
+  if(node) node.textContent = label;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content = resolvedTheme(choice) === "dark" ? "#141311" : "#ffffff";
+}
+function cycleTheme(){
+  const current = localStorage.getItem("bibleverse-theme") || "system";
+  const next = THEME_CYCLE[(THEME_CYCLE.indexOf(current) + 1) % THEME_CYCLE.length];
+  localStorage.setItem("bibleverse-theme", next);
+  applyTheme(next);
+}
+function renderStreak(){
+  const streak = recordStreak(localStorage);
+  const label = streak.count === 1 ? "Day 1 · you opened Scripture today" : `Day ${streak.count} · best ${streak.best}`;
+  $("#streakCard").textContent = label;
+  $("#profileStreak").textContent = streak.count === 1 ? "1 day streak" : `${streak.count} day streak · best ${streak.best}`;
+}
+function renderPlus(){
+  const site = siteConfig();
+  const platform = window.Capacitor?.getPlatform?.() || "web";
+  const offer = purchaseAvailability(site, platform);
+  const owned = readEntitlement(localStorage).active;
+  const status = $("#plusStatus");
+  const buy = $("#plusBuyBtn");
+  if(owned){
+    status.textContent = "Plus is on for this device.";
+    buy.textContent = "Plus is on";
+    buy.disabled = true;
+    return;
+  }
+  if(!offer.ready){
+    status.textContent = "Purchases are not turned on. Nothing will be charged.";
+    buy.textContent = "Purchases are not turned on";
+    buy.disabled = true;
+    return;
+  }
+  status.textContent = "Store purchases can be connected for entitlement “" + offer.entitlementId + "”.";
+  buy.textContent = "Continue with the store";
+  buy.disabled = true;
+}
+window.BibleVerseCards = { shareVerseCard };
+applyTheme(localStorage.getItem("bibleverse-theme") || "system");
+renderStreak();
 const startView = viewFromLocation();
 navStack.push(startView);
 history.replaceState({ view: startView }, "", hashFor(startView));

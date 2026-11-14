@@ -1,3 +1,5 @@
+import { shareVerseCard } from "./verse-card.js";
+
 // Full offline Bible reader (World English Bible Catholic Edition bundled in data/). No network needed after load:
 // in the native apps the files ship inside the bundle; on the web the service worker caches them.
 const $ = (s) => document.querySelector(s);
@@ -11,6 +13,17 @@ let selected = null;           // {book, chapter, verse, text}
 let fontScale = 1;
 let allVersesPromise = null;
 let toast = (m) => console.log(m);
+const HIGHLIGHT_KEY = "bibleverse-highlights";
+function highlightId(book, chapter, verse) { return `${book}:${chapter}:${verse}`; }
+function readHighlights() {
+  try {
+    const v = JSON.parse(localStorage.getItem(HIGHLIGHT_KEY) || "[]");
+    return new Set(Array.isArray(v) ? v : []);
+  } catch { return new Set(); }
+}
+function writeHighlights(set) {
+  try { localStorage.setItem(HIGHLIGHT_KEY, JSON.stringify([...set])); } catch {}
+}
 
 try {
   const r = JSON.parse(localStorage.getItem("bibleverse-reading-catholic") || "null");
@@ -67,8 +80,9 @@ async function openChapter(bookIdx, chapter, scrollTop = false) {
   // leave verses blank (absent from the critical text): skip them in display
   // while keeping real verse numbers from the array position.
   const shown = verses.map((t, i) => ({ t, n: i + 1 })).filter((x) => x.t.trim().length > 0);
+  const marks = readHighlights();
   $("#verses").innerHTML = shown.map(({ t, n }) => `
-    <p class="verse-line" data-verse="${n}" tabindex="0"><sup>${n}</sup>${esc(t)}</p>`).join("");
+    <p class="verse-line${marks.has(highlightId(bookIdx, chapter, n)) ? " highlighted" : ""}" data-verse="${n}" tabindex="0"><sup>${n}</sup>${esc(t)}</p>`).join("");
   $("#verses").querySelectorAll("[data-verse]").forEach((el) => {
     const pick = () => selectVerse(bookIdx, chapter, Number(el.dataset.verse), verses[Number(el.dataset.verse) - 1], el);
     el.addEventListener("click", pick);
@@ -216,6 +230,29 @@ export function initBible({ showToast } = {}) {
   }
   $("#selectedCopyBtn").addEventListener("click", () => verseAction(false));
   $("#selectedShareBtn").addEventListener("click", () => verseAction(true));
+  $("#selectedHighlightBtn").addEventListener("click", () => {
+    if (!selected) return;
+    const marks = readHighlights();
+    const id = highlightId(selected.book, selected.chapter, selected.verse);
+    if (marks.has(id)) marks.delete(id); else marks.add(id);
+    writeHighlights(marks);
+    document.querySelector(`#verses [data-verse="${selected.verse}"]`)?.classList.toggle("highlighted", marks.has(id));
+    toast(marks.has(id) ? "Highlighted on this device" : "Highlight removed");
+  });
+  $("#selectedCardBtn").addEventListener("click", async () => {
+    if (!selected) return;
+    const b = meta.books[selected.book];
+    try {
+      const how = await shareVerseCard({
+        title: b.name,
+        verse: selected.text.trim(),
+        ref: `${b.name} ${selected.chapter}:${selected.verse}`,
+        bg: "#1e3a2f",
+        fg: "#f7f3ea",
+      });
+      toast(how === "shared" ? "Verse card ready to send" : "Verse card saved to your downloads");
+    } catch { toast("Could not make a verse card"); }
+  });
   window.addEventListener("online", () => { $("#bibleOfflinePill").textContent = "● Offline ready"; });
   window.addEventListener("offline", () => { $("#bibleOfflinePill").textContent = "● You're offline — Bible still works"; });
 
