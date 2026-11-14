@@ -50,15 +50,75 @@ try {
 <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png"/>
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" sizes="180x180"/>
 <link rel="manifest" href="manifest.webmanifest"/>
+<link rel="preload" href="assets/fonts/newsreader-400.woff2" as="font" type="font/woff2" crossorigin/>
+<link rel="preload" href="assets/fonts/fraunces-900.woff2" as="font" type="font/woff2" crossorigin/>
 <style>
-  body{margin:0;background:#0a0a0a}
-  .reflect{background:#1e3a2f;color:#f7f3ea;margin:12px 16px;padding:22px 20px;border-radius:22px}
-  .reflect-name{font-size:40px;line-height:1;margin:0 0 12px;color:#fff8e8}
-  .reflect-verse{font-size:22px;line-height:1.45;margin:0}
-  .reflect-kicker{color:#fff4cc;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  @font-face{font-family:"DM Sans Fallback";src:local("Arial");size-adjust:101.5%;ascent-override:97.7%;descent-override:30.5%;line-gap-override:0%}
+  @font-face{font-family:"Fraunces Fallback";src:local("Georgia");size-adjust:100.4%;ascent-override:97.4%;descent-override:25.4%;line-gap-override:0%}
+  @font-face{font-family:"Newsreader Fallback";src:local("Georgia");size-adjust:88.8%;ascent-override:82.8%;descent-override:29.8%;line-gap-override:0%}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#0a0a0a;color:#fff;font-family:"DM Sans","DM Sans Fallback",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  button{font:inherit;background:none;border:0;color:inherit;padding:0}
+  input,textarea{font:inherit}
+  .stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;gap:56px;padding:28px 20px}
+  .side{max-width:400px;display:block}
+  .phone{position:relative;width:min(430px,100vw);height:min(932px,100dvh);background:#fff;color:#000;display:flex;flex-direction:column;overflow:hidden;flex:none}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 22px 4px;font-size:14px;font-weight:700;background:#fff;flex:none}
+  .home-indicator{width:134px;height:5px;border-radius:99px;background:#000;margin:6px auto 7px;flex:none}
+  @media(min-width:900px){.phone{border-radius:44px;border:10px solid #1a1a1a;height:min(880px,calc(100dvh - 40px))}}
+  @media(max-width:899px){.stage{padding:0;gap:0}.side{display:none}.phone{width:100vw;height:100dvh;border:0}.statusbar,.home-indicator,.notch{display:none}}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 10px;border-bottom:1px solid #dbdbdb;background:#fff;flex:none}
+  .wordmark{font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:22px;letter-spacing:-.03em;display:inline-flex;align-items:center;color:#000}
+  .brand-mark.sm{width:27px;height:27px;margin-right:7px}
+  .appbar-actions{display:flex;gap:12px;align-items:center}
+  .icon-btn{width:26px;height:26px}
+  .icon-btn svg{width:26px;height:26px;display:block}
+  .scroll{flex:1;overflow-y:auto;background:#fff}
+  .view{padding-bottom:14px}
+  .searchbar{display:flex;align-items:center;gap:8px;background:#efefef;border-radius:10px;margin:8px 16px 10px;padding:9px 12px;min-height:40px}
+  .header-search{margin:0 12px 8px}
+  .header-search-wrap{background:#fff;flex:none}
+  .searchbar input{flex:1;border:0;outline:0;background:transparent;font-size:16px;color:#000;min-width:0}
+  .search-icon{width:16px;height:16px;flex:none}
+  .streak-chip{flex:none;background:#141311;color:#f6f1e6;font-weight:800;font-size:12px;border-radius:99px;padding:6px 10px;min-height:28px;line-height:1}
+  .stories{display:flex;gap:16px;overflow:hidden;padding:12px 16px 10px;min-height:108px;border-bottom:1px solid #efefef}
+  .post{border-bottom:1px solid #efefef;padding-bottom:14px}
+  .post-head{display:flex;align-items:center;gap:10px;padding:10px 12px;min-height:56px}
+  .avatar{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:12px}
+  .post-user{flex:1;min-width:0;line-height:1.2}
+  .media{position:relative;aspect-ratio:4/4.4;width:100%;overflow:hidden;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:28px 26px}
+  .media-kicker{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin:0 0 12px}
+  .media-name{font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:clamp(32px,9.5vw,42px);line-height:1;letter-spacing:-.02em;margin:0 0 14px}
+  .media-verse{font-family:Newsreader,"Newsreader Fallback",Georgia,serif;font-size:clamp(19px,5.8vw,24px);line-height:1.45;margin:0}
+  .media-ref{margin-top:18px;display:inline-flex;align-self:flex-start;padding:7px 11px;border-radius:999px;font-size:12.5px;font-weight:800}
+  .actions{display:flex;align-items:center;gap:16px;padding:10px 12px 4px;min-height:47px}
+  .act{width:27px;height:27px;padding:0}
+  .act svg{width:27px;height:27px;display:block}
+  .caption{padding:4px 12px 0;font-size:13.5px;line-height:1.45}
+  .reflect{margin:12px 16px 8px;padding:22px 20px 18px;border-radius:22px;background:#1e3a2f;color:#f7f3ea}
+  .reflect-kicker{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff4cc}
+  .reflect-name{margin:0 0 12px;font-family:Fraunces,"Fraunces Fallback",Georgia,serif;font-weight:900;font-size:clamp(32px,8vw,46px);line-height:.98;letter-spacing:-.03em;color:#fff8e8}
+  .reflect-verse{margin:0;font-family:Newsreader,"Newsreader Fallback",Georgia,serif;font-size:clamp(20px,5.2vw,26px);line-height:1.45}
+  .reflect-ref{display:inline-block;margin-top:14px;font-weight:800}
+  .reflect-prompt{margin:14px 0 0;line-height:1.5;color:#f3ead4}
+  .note-label{display:grid;gap:6px;margin-top:16px;font-size:13px;font-weight:700}
+  .verse-note{width:100%;min-height:78px;border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.14);color:#fff}
+  .reflect-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .ig-btn{background:#0a4ea3;color:#fff;font-weight:800;font-size:14px;padding:9px 18px;border-radius:10px}
+  .ig-btn.ghost{background:#efefef;color:#000}
+  .tabbar{flex:none;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 4px;border-top:1px solid #dbdbdb;background:#fff;min-height:56px}
+  .tab{width:48px;height:40px;display:grid;place-items:center}
+  .tab svg{width:26px;height:26px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .pull-refresh{height:0;overflow:visible}
+  html[data-theme="dark"] body{background:#050504}
+  html[data-theme="dark"] .phone,html[data-theme="dark"] .appbar,html[data-theme="dark"] .tabbar,html[data-theme="dark"] .scroll{background:#141311;color:#f6f1e6}
+  html[data-theme="dark"] .wordmark,html[data-theme="dark"] .icon-btn,html[data-theme="dark"] .tab{color:#f6f1e6}
 </style>
-<link rel="stylesheet" href="fonts.css"/>
-<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="fonts.css" media="print" onload="this.media='all'"/>
+<link rel="stylesheet" href="style.css" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="fonts.css"/><link rel="stylesheet" href="style.css"/></noscript>
 </head>
 <body>
 <div class="stage">
@@ -88,7 +148,8 @@ try {
     </div>
 
     <header class="appbar">
-      <button class="wordmark" id="wordmarkBtn" aria-label="BibleVerse, open profile"><img class="brand-mark sm" src="assets/logo.svg" alt=""/>BibleVerse</button>
+      <button class="wordmark" id="wordmarkBtn" aria-label="BibleVerse, open profile"><img class="brand-mark sm" src="assets/logo.svg" alt="" width="27" height="27"/>BibleVerse</button>
+      <button class="streak-chip" id="streakCard" type="button">Day 1</button>
       <div class="appbar-actions">
         <button class="icon-btn" id="newPostBtn" aria-label="Verse of the day">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>
@@ -102,44 +163,60 @@ try {
         </button>
       </div>
     </header>
+    <div class="header-search-wrap">
+      <label class="searchbar header-search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg><input id="homeSearch" type="search" placeholder="Search verses, the Bible, and feasts" aria-label="Search named verses, the full Bible, and feasts"/></label>
+    </div>
 
     <main class="scroll" id="scrollArea">
       <div class="pull-refresh" id="pullRefresh" aria-hidden="true"><span class="pull-pill" id="pullPill"><span class="pull-icon" id="pullIcon">↓</span><span id="pullText">Pull to refresh</span></span></div>
       <!-- FEED -->
       <section id="view-feed" class="view">
-        <label class="searchbar home-search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg><input id="homeSearch" type="search" placeholder="Search verses, the Bible, and feasts" aria-label="Search named verses, the full Bible, and feasts"/></label>
         <div id="homeResults" hidden></div>
-        <div id="homeToday">
-          <button class="streak-card" id="streakCard" type="button">Day 1 · today's verse</button>
-          <div id="feed"><article class="reflect" data-today data-id="41" data-source="build">
-    <p class="reflect-kicker">Today&#39;s verse · Courage</p>
-    <h2 class="reflect-name">Power, Love, Self-Control</h2>
-    <p class="reflect-verse">“For God didn’t give us a spirit of fear, but of power, love, and self-control.”</p>
-    <p class="reflect-ref">2 Timothy 1:7</p>
-    <p class="reflect-prompt">Fear is not from God. Power, love, and a steady mind are.</p>
-    <label class="note-label">Your note, kept on this device
-      <textarea class="verse-note" data-note="41" maxlength="500" placeholder="Write a reflection. It never leaves this device."></textarea>
-    </label>
-    <div class="reflect-actions">
-      <button type="button" class="ig-btn ghost" data-save="41">Favourite</button>
-      <button type="button" class="ig-btn ghost" data-share="41">Share card</button>
+        <div class="stories" id="stories" aria-label="Topics"></div>
+        <div id="feed"><article class="post" data-id="41" data-prerender>
+    <div class="post-head">
+      <span class="avatar" style="background:#7c2d12">P</span>
+      <div class="post-user"><b>Paul</b><small>@paul · 2 Timothy 1:7 · Courage</small></div>
+      <button class="more-btn" data-more="41" aria-label="Copy verse text">Copy</button>
     </div>
+    <div class="media" data-dbl="41" style="background:#7c2d12;color:#fff7ed" role="img" aria-label="Power, Love, Self-Control — 2 Timothy 1:7">
+      <p class="media-kicker">Courage · 2 Timothy</p>
+      <h2 class="media-name">Power, Love, Self-Control</h2>
+      <p class="media-verse">“For God didn’t give us a spirit of fear, but of power, love, and self-control.”</p>
+      <span class="media-ref">2 Timothy 1:7</span>
+      <span class="media-dots"><i class="on"></i><i></i><i></i></span>
+    </div>
+    <div class="actions">
+      <button class="act like-btn " data-like="41" aria-label="Like" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 20.5s-7.5-4.6-9.3-9C1.2 8 3.2 4.9 6.4 4.9c2 0 3.4 1.1 5.6 3.4 2.2-2.3 3.6-3.4 5.6-3.4 3.2 0 5.2 3.1 3.7 6.6-1.8 4.4-9.3 9-9.3 9Z"/></svg></button>
+      <button class="act" data-comment-focus="41" aria-label="Comment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3c5.2 0 9.5 3.8 9.5 8.5S17.2 20 12 20c-1.1 0-2.2-.17-3.2-.5L3 20l.9-3.4C3.3 15.2 2.5 13.4 2.5 11.5 2.5 6.8 6.8 3 12 3Z"/></svg></button>
+      <button class="act" data-share="41" aria-label="Share verse card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" stroke-linejoin="round"/></svg></button>
+      <span class="spacer"></span>
+      <button class="act save-btn " data-save="41" aria-label="Favourite" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 3h12v18l-6-4.5L6 21V3Z" stroke-linejoin="round"/></svg></button>
+    </div>
+    <p class="caption"><b>@paul</b><span class="name-tag">Power, Love, Self-Control —</span> <span class="reflection-line">Fear is not from God. Power, love, and a steady mind are.</span></p>
+    <button class="comments-link" data-view-comments="41">Add a comment…</button>
+    <div class="add-comment"><input data-comment-input="41" placeholder="Add a comment…" maxlength="140"/><button class="post-btn" data-post-comment="41" hidden>Post</button></div>
   </article></div>
-          <section id="plans" aria-label="Reading plans"></section>
-          <section class="reminder" id="reminder">
-            <h2 class="view-title">Daily reminder</h2>
-            <p class="view-sub" id="reminderHelp">Choose a time. The installed iPhone and Android app delivers the alert. This page only remembers it.</p>
-            <div class="reflect-actions">
-              <input id="reminderTime" type="time" value="08:00" aria-label="Reminder time"/>
-              <button class="ig-btn" id="reminderSave" type="button">Save reminder</button>
-            </div>
-          </section>
+        <div id="feedEmpty" class="empty" hidden>
+          <div class="empty-emoji">📖</div><h2>No verses here yet</h2>
+          <p>Try another topic.</p>
+          <button class="ig-btn" id="clearFilterBtn">Show all verses</button>
         </div>
+        <p class="feed-end">✦ &nbsp;You're all caught up&nbsp; ✦<br><span>You've seen every named verse for now.</span></p>
       </section>
 
       <!-- DISCOVER -->
       <section id="view-discover" class="view" hidden>
-        <label class="searchbar"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8" stroke-linecap="round"/></svg><input id="searchInput" type="search" placeholder="Search by name, topic, or reference — e.g. peace, Psalm 23…" aria-label="Search daily verses by name, topic, or Bible reference"/></label>
+        <div id="todayHost"></div>
+        <section id="plans" aria-label="Reading plans"></section>
+        <section class="reminder" id="reminder">
+          <h2 class="view-title">Daily reminder</h2>
+          <p class="view-sub" id="reminderHelp">Choose a time. The installed iPhone and Android app delivers the alert. This page only remembers it.</p>
+          <div class="reflect-actions">
+            <input id="reminderTime" type="time" value="08:00" aria-label="Reminder time"/>
+            <button class="ig-btn" id="reminderSave" type="button">Save reminder</button>
+          </div>
+        </section>
         <div class="chips" id="topicChips"></div>
         <div class="grid" id="discoverGrid"></div>
         <p class="grid-empty" id="gridEmpty" hidden>No verse matches that search.</p>

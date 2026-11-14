@@ -1,19 +1,16 @@
 import { VERSES } from "./verses.js";
-import { initBible } from "./bible.js";
 import { buildFeedOrder, dayOfYear } from "./feed-rotation.js";
 import { createPullRefresh } from "./pull-refresh.js";
 import { recordStreak } from "./streak.js";
-import { purchaseAvailability, readEntitlement, siteConfig } from "./plus.js";
-import { shareVerseCard } from "./verse-card.js";
 import { todayCardHTML } from "./hero.js";
-import { startablePlans, lockedPlans, readPlanProgress, togglePlanDay } from "./plans.js";
+import { postHTML } from "./feed-card.js";
 import { parseReminderTime, reminderNotification } from "./reminders.js";
 import { readNotes, writeNote } from "./notes.js";
-import { feastSources, rankExplanation, rankLabel } from "./feast-links.js";
-import { feastsOn, upcomingFeasts, seasonOf, toDate, RANK_DOT, searchFeasts, massStats, key as feastKey } from "./feasts.js";
+// bible.js, feasts.js, plans.js, verse-card.js, and plus.js load on demand
+// so the home screen does not parse them or the Bible JSON.
 const $ = s => document.querySelector(s);
 const feedEl = $("#feed"), savedFeedEl = $("#savedFeed"), storiesEl = $("#stories"), toastEl = $("#toast"), burstEl = $("#burst");
-let activeTopic = "All", reelIndex = 0, pinned = null, order = [...VERSES], reelPool = [...VERSES];
+let activeTopic = "All", reelIndex = 0, order = [...VERSES], reelPool = [...VERSES];
 // Fresh feed, stable day: date-seeded shuffle, unseen verses first, one-step
 // rotation per visit — the top of the feed is never the same twice in a row.
 try {
@@ -29,31 +26,58 @@ function persistAll(){ persist("bibleverse-liked",[...liked]); persist("biblever
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function showToast(m){ toastEl.textContent=m; toastEl.classList.add("show"); clearTimeout(showToast._t); showToast._t=setTimeout(()=>toastEl.classList.remove("show"),2200); }
 function noteFor(id){ return readNotes(localStorage)["verse:"+id] || ""; }
-function renderFeed(){
-  const v = (pinned && VERSES.find(x => x.id === pinned)) || order[0];
-  if(!v || !feedEl) return;
-  const existing = feedEl.querySelector("[data-today]");
-  const kicker = pinned ? "A verse" : "Today's verse";
-  if(existing && Number(existing.dataset.id) === v.id && existing.querySelector(".reflect-kicker")?.textContent.startsWith(kicker)){
-    const area = existing.querySelector("[data-note]");
-    if(area && document.activeElement !== area) area.value = noteFor(v.id);
-    const saveBtn = existing.querySelector("[data-save]");
-    if(saveBtn){
-      const on = saved.has(v.id);
-      saveBtn.textContent = on ? "Favourited" : "Favourite";
-      saveBtn.classList.toggle("ghost", !on);
-    }
-    bindToday(feedEl);
-    return;
+let biblePromise = null;
+function loadBible(){
+  if(!biblePromise) biblePromise = import("./bible.js").then((mod) => mod.initBible({ showToast }));
+  return biblePromise;
+}
+let feastMod = null;
+function ensureFeasts(){
+  if(!feastMod){
+    feastMod = Promise.all([import("./feasts.js"), import("./feast-links.js")]).then(([cal, links]) => {
+      feastMod = { ...cal, ...links };
+      return feastMod;
+    });
   }
-  feedEl.innerHTML = todayCardHTML(v, { note: noteFor(v.id), saved: saved.has(v.id), kicker });
-  bindToday(feedEl);
+  return Promise.resolve(feastMod);
+}
+function rankLabel(rank){ return feastMod.rankLabel(rank); }
+function rankExplanation(rank){ return feastMod.rankExplanation(rank); }
+function feastSources(feast){ return feastMod.feastSources(feast); }
+function seasonOf(input){ return feastMod.seasonOf(input); }
+function toDate(y, m, d){ return feastMod.toDate(y, m, d); }
+function feastsOn(dt){ return feastMod.feastsOn(dt); }
+function upcomingFeasts(dt, days){ return feastMod.upcomingFeasts(dt, days); }
+function searchFeasts(q, today){ return feastMod.searchFeasts(q, today); }
+function massStats(log, today){ return feastMod.massStats(log, today); }
+function feastKey(y, m, d){ return feastMod.key(y, m, d); }
+function rankDot(rank){ return feastMod.RANK_DOT[rank] || "#9ca3af"; }
+function cardOpts(v){ return { liked: liked.has(v.id), saved: saved.has(v.id), comments: comments[v.id] || [] }; }
+function filteredFeed(){ return activeTopic === "All" ? order : order.filter(v => v.topic === activeTopic); }
+function renderFeed(){
+  if(!feedEl) return;
+  const list = filteredFeed();
+  const keep = feedEl.querySelector("[data-prerender]");
+  const sameTop = keep && list[0] && Number(keep.dataset.id) === list[0].id && activeTopic === "All";
+  if(sameTop && !(comments[list[0].id] || []).length){
+    const likeBtn = keep.querySelector("[data-like]");
+    if(likeBtn){ likeBtn.classList.toggle("liked", liked.has(list[0].id)); likeBtn.setAttribute("aria-pressed", liked.has(list[0].id) ? "true" : "false"); }
+    const saveBtn = keep.querySelector("[data-save]");
+    if(saveBtn){ saveBtn.classList.toggle("saved", saved.has(list[0].id)); saveBtn.setAttribute("aria-pressed", saved.has(list[0].id) ? "true" : "false"); }
+    feedEl.querySelectorAll(".post:not([data-prerender])").forEach(node => node.remove());
+    feedEl.insertAdjacentHTML("beforeend", list.slice(1).map(v => postHTML(v, cardOpts(v))).join(""));
+  } else {
+    feedEl.innerHTML = list.map(v => postHTML(v, cardOpts(v))).join("");
+  }
+  const empty = $("#feedEmpty");
+  if(empty) empty.hidden = list.length > 0;
+  bindPosts(feedEl);
 }
 function renderSaved(){
   const list = VERSES.filter(v => saved.has(v.id));
-  savedFeedEl.innerHTML = list.map(v => todayCardHTML(v, { note: noteFor(v.id), saved: true, kicker: "Favourite" })).join("");
+  savedFeedEl.innerHTML = list.map(v => postHTML(v, cardOpts(v))).join("");
   $("#savedEmpty").style.display = list.length ? "none" : "block";
-  bindToday(savedFeedEl);
+  bindPosts(savedFeedEl);
   updateBadges();
 }
 function renderGrid(el, list){
@@ -80,21 +104,21 @@ function scoreFeedVerse(v, tokens){
   return score;
 }
 function renderDiscover(){
-  const q = norm($("#searchInput").value);
-  const tokens = q.split(" ").filter(Boolean);
+  const host = $("#todayHost");
+  const verse = order[0];
+  if(host && verse){
+    host.innerHTML = todayCardHTML(verse, { note: noteFor(verse.id), saved: saved.has(verse.id), kicker: "Today's verse" });
+    bindToday(host);
+  }
   const pool = VERSES.filter(v => activeTopic === "All" || v.topic === activeTopic);
-  const list = pool
-    .map(v => ({ v, s: scoreFeedVerse(v, tokens) }))
-    .filter(x => x.s >= 0)
-    .sort((a, b) => b.s - a.s)
-    .map(x => x.v);
-  renderGrid($("#discoverGrid"), list);
-  $("#gridEmpty").hidden = list.length > 0;
-  $("#gridEmpty").textContent = tokens.length ? `No verses match “${($("#searchInput").value || "").trim()}”. Try a name, a topic like Peace, or a reference like John 1:5.` : "No verse matches that search.";
+  renderGrid($("#discoverGrid"), pool);
+  const empty = $("#gridEmpty");
+  if(empty) empty.hidden = pool.length > 0;
 }
+let planDays = 0;
 function renderProfile(){
   renderGrid($("#profileGrid"), order.slice(0, 9));
-  const days = readPlanProgress(localStorage, "psalms-comfort").length + readPlanProgress(localStorage, "gospels-30").length;
+  const days = planDays;
   const likedStat = $("#statLiked");
   if(likedStat) likedStat.textContent = String(days);
   const savedStat = $("#statSaved2");
@@ -109,6 +133,7 @@ function toggleSave(id){ const was=saved.has(id); was?saved.delete(id):saved.add
 async function shareVerse(id){
   const v=VERSES.find(x=>x.id===id);
   try {
+    const { shareVerseCard } = await import("./verse-card.js");
     const how = await shareVerseCard({ title: v.name, verse: v.verse, ref: v.ref, bg: v.bg, fg: v.fg });
     showToast(how === "shared" ? "Verse card ready to send" : "Verse card saved to your downloads");
   } catch {
@@ -136,16 +161,80 @@ function bindToday(root){
     area.oninput = () => writeNote(localStorage, "verse:" + area.dataset.note, area.value);
   });
 }
-function openVerse(id){ pinned = id; switchView("feed"); renderFeed(); $("#homeSearch").value = ""; $("#homeResults").hidden = true; $("#homeToday").hidden = false; }
+function initials(name){ return String(name || "").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase(); }
+function bindPosts(root){
+  if(!root) return;
+  bindMedia(root);
+  root.querySelectorAll("[data-like]").forEach(b => { b.onclick = () => toggleLike(Number(b.dataset.like)); });
+  root.querySelectorAll("[data-save]").forEach(b => { b.onclick = () => toggleSave(Number(b.dataset.save)); });
+  root.querySelectorAll("[data-share]").forEach(b => { b.onclick = () => shareVerse(Number(b.dataset.share)); });
+  root.querySelectorAll("[data-more]").forEach(b => { b.onclick = () => copyVerse(Number(b.dataset.more)); });
+  root.querySelectorAll("[data-comment-focus],[data-view-comments]").forEach(b => b.onclick = () => {
+    const id = b.dataset.commentFocus || b.dataset.viewComments;
+    root.querySelector(`[data-comment-input="${id}"]`)?.focus();
+  });
+  root.querySelectorAll("[data-comment-input]").forEach(inp => {
+    const btn = root.querySelector(`[data-post-comment="${inp.dataset.commentInput}"]`);
+    inp.oninput = () => { if(btn) btn.hidden = !inp.value.trim(); };
+    inp.onkeydown = (e) => { if(e.key === "Enter") btn?.click(); };
+  });
+  root.querySelectorAll("[data-post-comment]").forEach(b => { b.onclick = () => {
+    const id = Number(b.dataset.postComment);
+    const inp = root.querySelector(`[data-comment-input="${id}"]`);
+    const text = inp?.value.trim();
+    if(!text) return;
+    (comments[id] ??= []).push(text);
+    persistAll();
+    renderAll();
+    showToast("Comment posted");
+  }; });
+}
+function openVerse(id){
+  activeTopic = "All";
+  const search = $("#homeSearch");
+  if(search) search.value = "";
+  const results = $("#homeResults");
+  if(results){ results.hidden = true; results.innerHTML = ""; }
+  showFeed(true);
+  renderStories();
+  switchView("feed");
+  requestAnimationFrame(() => { document.querySelector(`.post[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" }); });
+}
 function renderStories(){
-  const topics=["All",...new Set(VERSES.map(v=>v.topic))];
-  const chips=$("#topicChips");
+  const topics = ["All", ...new Set(VERSES.map(v => v.topic))];
+  if(storiesEl){
+    storiesEl.innerHTML = topics.map(t => {
+      const v = VERSES.find(x => x.topic === t) || VERSES[0];
+      return `<button class="story ${activeTopic === t ? "active" : ""}" data-story="${esc(t)}"><span class="story-ring ${activeTopic === t ? "active" : ""}"><span class="story-avatar" style="background:${t === "All" ? "#000" : v.bg}">${t === "All" ? "✦" : esc(initials(t))}</span></span><span>${esc(t)}</span></button>`;
+    }).join("");
+    storiesEl.querySelectorAll("[data-story]").forEach(s => s.addEventListener("click", () => {
+      activeTopic = s.dataset.story;
+      renderStories();
+      renderFeed();
+      renderDiscover();
+      $("#scrollArea").scrollTo({ top: 0, behavior: "smooth" });
+    }));
+  }
+  const chips = $("#topicChips");
   if(!chips) return;
-  chips.innerHTML=topics.map(t=>`<button class="chip ${activeTopic===t?"active":""}" data-chip="${esc(t)}">${esc(t)}</button>`).join("");
-  chips.querySelectorAll("[data-chip]").forEach(c=>c.addEventListener("click",()=>{ activeTopic=c.dataset.chip; renderStories(); renderDiscover(); }));
+  chips.innerHTML = topics.map(t => `<button class="chip ${activeTopic === t ? "active" : ""}" data-chip="${esc(t)}">${esc(t)}</button>`).join("");
+  chips.querySelectorAll("[data-chip]").forEach(c => c.addEventListener("click", () => {
+    activeTopic = c.dataset.chip;
+    renderStories();
+    renderFeed();
+    renderDiscover();
+  }));
+}
+function showFeed(on){
+  const stories = document.getElementById("stories");
+  const feed = document.getElementById("feed");
+  const end = document.querySelector(".feed-end");
+  if(stories) stories.hidden = !on;
+  if(feed) feed.hidden = !on;
+  if(end) end.hidden = !on;
+  if(!on){ const empty = document.getElementById("feedEmpty"); if(empty) empty.hidden = true; }
 }
 
-const bible = initBible({ showToast });
 // ---------- Feasts & Saints ----------
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -156,11 +245,12 @@ let homeTimer = 0;
 async function renderHomeSearch(){
   const input = $("#homeSearch");
   const box = $("#homeResults");
-  const today = $("#homeToday");
-  if(!input || !box || !today) return;
+  if(!input || !box) return;
   const q = input.value.trim();
-  if(q.length < 2){ box.hidden = true; box.innerHTML = ""; today.hidden = false; return; }
-  today.hidden = true;
+  if(q.length < 2){ box.hidden = true; box.innerHTML = ""; showFeed(true); return; }
+  await ensureFeasts();
+  const bible = await loadBible();
+  showFeed(false);
   box.hidden = false;
   const tokens = norm(q).split(" ").filter(Boolean);
   const named = VERSES.map(v => ({ v, s: scoreFeedVerse(v, tokens) })).filter(x => x.s >= 0).sort((a,b) => b.s - a.s).slice(0, 6).map(x => x.v);
@@ -185,10 +275,12 @@ async function renderHomeSearch(){
     if (feast) openFeastSheet(feast);
   }; });
 }
-function renderPlans(){
+async function renderPlans(){
   const host = $("#plans");
   if(!host) return;
-  const plusOn = siteConfig().plusEnabled === true;
+  const { startablePlans, lockedPlans, readPlanProgress, togglePlanDay } = await import("./plans.js");
+  const plusOn = window.BIBLEVERSE_SITE?.plusEnabled === true;
+  planDays = readPlanProgress(localStorage, "psalms-comfort").length + readPlanProgress(localStorage, "gospels-30").length;
   const cards = startablePlans(plusOn).map(plan => {
     const done = readPlanProgress(localStorage, plan.id);
     const next = plan.readings.findIndex((_, i) => !done.includes(i));
@@ -199,7 +291,7 @@ function renderPlans(){
   }).join("");
   const locked = lockedPlans(plusOn).map(plan => `<article class="plan-card plan-locked"><p class="reflect-kicker">Plus</p><h3>${esc(plan.title)}</h3><p class="view-sub">${esc(plan.length)}. This longer plan stays off until Plus is turned on.</p></article>`).join("");
   host.innerHTML = `<h2 class="view-title">Reading plans</h2>${cards}${locked}`;
-  host.querySelectorAll("[data-plan-ref]").forEach(b => { b.onclick = () => { $("#homeSearch").value = b.dataset.planRef; renderHomeSearch(); }; });
+  host.querySelectorAll("[data-plan-ref]").forEach(b => { b.onclick = () => { switchView("feed"); $("#homeSearch").value = b.dataset.planRef; renderHomeSearch(); }; });
   host.querySelectorAll("[data-plan-done]").forEach(b => { b.onclick = () => { togglePlanDay(localStorage, b.dataset.planDone, Number(b.dataset.planDay)); renderPlans(); renderProfile(); }; });
 }
 async function saveReminder(){
@@ -231,8 +323,9 @@ function feastRows(list){
   if(!list.length) return "";
   return `<div class="feast-list">` + list.map(f => `<button type="button" class="feast-row" data-feast-open="${stashFeast(f)}"><span class="rank ${esc(f.rank)}">${esc(rankLabel(f.rank))}</span><div><b>${esc(f.name)}</b><small>${esc(f.about || "")}</small>${f.obligation?`<span class="obl">✦ Holy Day of Obligation</span>`:""}</div></button>`).join("") + `</div>`;
 }
-function openFeastSheet(feast){
+async function openFeastSheet(feast){
   if(!feast) return;
+  await ensureFeasts();
   const sheet = $("#feastSheet");
   const season = seasonOf(toDate(feast.y, feast.m, feast.d));
   const when = `${WEEKDAYS[toDate(feast.y, feast.m, feast.d).getDay()]}, ${MONTHS[feast.m - 1]} ${feast.d}, ${feast.y}`;
@@ -253,7 +346,8 @@ function openFeastSheet(feast){
   $("#feastSheetLinks").hidden = false;
   sheet.showModal();
 }
-function openRankSheet(rank){
+async function openRankSheet(rank){
+  await ensureFeasts();
   const sheet = $("#feastSheet");
   $("#feastSheetRank").className = `rank ${rank}`;
   $("#feastSheetRank").textContent = rankLabel(rank);
@@ -266,7 +360,8 @@ function openRankSheet(rank){
   $("#feastSheetLinks").hidden = true;
   sheet.showModal();
 }
-function renderFeasts(){
+async function renderFeasts(){
+  await ensureFeasts();
   const now = new Date();
   if(calY === null){ calY = now.getFullYear(); calM = now.getMonth() + 1; calSel = { y: calY, m: calM, d: now.getDate() }; }
   const season = seasonOf(now), todayList = feastsOn(now);
@@ -285,7 +380,7 @@ function renderFeasts(){
     if(new Date(calY, calM-1, d).getDay()===0) cls.push("sun");
     if(calY===tY && calM===tM && d===tD) cls.push("today");
     if(calSel && calSel.y===calY && calSel.m===calM && calSel.d===d) cls.push("sel");
-    const dots = items.slice(0,3).map(f=>`<i style="background:${RANK_DOT[f.rank]||"#9ca3af"}"></i>`).join("");
+    const dots = items.slice(0,3).map(f=>`<i style="background:${rankDot(f.rank)}"></i>`).join("");
     cells += `<button class="${cls.join(" ")}" data-cal="${d}" aria-label="${MONTHS[calM-1]} ${d}${items.length?": "+esc(items.map(f=>f.name).join(", ")):""}">${d}${dots?`<span class="dots">${dots}</span>`:""}</button>`;
   }
   const grid = $("#calGrid");
@@ -325,7 +420,8 @@ function renderMass(now){
     showToast("Sunday Mass logged ✓");
   });
 }
-function renderFeastSearch(){
+async function renderFeastSearch(){
+  await ensureFeasts();
   const q = $("#feastSearch").value || "";
   const box = $("#feastSearchResults");
   if(!q.trim()){ box.innerHTML = ""; return; }
@@ -355,7 +451,7 @@ function switchView(name, opts = {}){
   document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===name));
   $("#scrollArea").scrollTo({top:0});
   if(name==="reel") renderReel();
-  if(name==="bible") bible.ensureLoaded();
+  if(name==="bible") loadBible().then((bible) => bible.ensureLoaded());
   if(name==="feasts") renderFeasts();
   if(opts.fromHistory) return;
   if(opts.replace){
@@ -379,7 +475,7 @@ window.addEventListener("popstate", () => {
   switchView(name, { fromHistory: true });
 });
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.view)));
-$("#searchInput").addEventListener("input", renderDiscover);
+$("#searchInput")?.addEventListener("input", renderDiscover);
 $("#feastSearch").addEventListener("input", renderFeastSearch);
 $("#view-feasts").addEventListener("click", (event) => {
   const feastBtn = event.target.closest("[data-feast-open]");
@@ -415,14 +511,18 @@ $("#supportBackBtn").addEventListener("click",()=>goBack("profile"));
 $("#plusBtn").addEventListener("click",()=>{ renderPlus(); switchView("plus"); });
 $("#plusBackBtn").addEventListener("click",()=>goBack("profile"));
 $("#plusBuyBtn").addEventListener("click",()=>showToast("Purchases are not turned on"));
-$("#plusRestoreBtn").addEventListener("click",()=>showToast(readEntitlement(localStorage).active ? "Plus is already on this device" : "No purchases to restore"));
+$("#plusRestoreBtn").addEventListener("click", async () => {
+  const { readEntitlement } = await import("./plus.js");
+  showToast(readEntitlement(localStorage).active ? "Plus is already on this device" : "No purchases to restore");
+});
 $("#themeBtn").addEventListener("click", cycleTheme);
 $("#streakCard").addEventListener("click",()=>switchView("reel"));
 $("#homeSearch")?.addEventListener("input", () => { clearTimeout(homeTimer); homeTimer = setTimeout(renderHomeSearch, 200); });
 $("#reminderSave")?.addEventListener("click", () => saveReminder());
 const remembered = localStorage.getItem("bibleverse-reminder");
 if(remembered && $("#reminderTime")) $("#reminderTime").value = remembered;
-renderPlans();
+const scheduleIdle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1));
+scheduleIdle(() => { renderPlans(); });
 $("#aboutShareBtn").addEventListener("click",()=>shareApp());
 $("#aboutCopyBtn").addEventListener("click",()=>shareApp(true));
 function openExternal(url){
@@ -478,13 +578,14 @@ function cycleTheme(){
 }
 function renderStreak(){
   const streak = recordStreak(localStorage);
-  const label = streak.count === 1 ? "Day 1 · you opened Scripture today" : `Day ${streak.count} · best ${streak.best}`;
-  $("#streakCard").textContent = label;
+  const chip = $("#streakCard");
+  if(chip) chip.textContent = streak.count === 1 ? "Day 1" : `Day ${streak.count}`;
   $("#profileStreak").textContent = streak.count === 1 ? "1 day streak" : `${streak.count} day streak · best ${streak.best}`;
   const stat = $("#streakStat");
   if(stat) stat.textContent = String(streak.count);
 }
-function renderPlus(){
+async function renderPlus(){
+  const { siteConfig, purchaseAvailability, readEntitlement } = await import("./plus.js");
   const site = siteConfig();
   const platform = window.Capacitor?.getPlatform?.() || "web";
   const offer = purchaseAvailability(site, platform);
@@ -507,7 +608,7 @@ function renderPlus(){
   buy.textContent = "Continue with the store";
   buy.disabled = true;
 }
-window.BibleVerseCards = { shareVerseCard };
+window.BibleVerseCards = { shareVerseCard: async (opts) => (await import("./verse-card.js")).shareVerseCard(opts) };
 applyTheme(localStorage.getItem("bibleverse-theme") || "system");
 renderStreak();
 const startView = viewFromLocation();
@@ -517,7 +618,7 @@ if(startView !== "feed") switchView(startView, { fromHistory: true });
 renderStories();
 renderFeed();
 updateBadges();
-const paintRest = () => { renderSaved(); renderDiscover(); renderProfile(); renderReel(); renderFeasts(); };
+const paintRest = () => { renderSaved(); renderDiscover(); renderProfile(); renderReel(); };
 if (startView === "feed" && typeof requestAnimationFrame === "function") requestAnimationFrame(paintRest);
 else paintRest();
 // Web/PWA offline: cache shell + full Bible. Native (Capacitor) apps already

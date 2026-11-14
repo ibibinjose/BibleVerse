@@ -1,6 +1,8 @@
-@font-face{font-family:'DM Sans';font-style:italic;font-weight:100 1000;font-display:optional;src:url('assets/fonts/dm-sans-italic.woff2') format('woff2')}
-@font-face{font-family:'DM Sans';font-style:normal;font-weight:100 1000;font-display:optional;src:url('assets/fonts/dm-sans.woff2') format('woff2')}
-@font-face{font-family:'Fraunces';font-style:italic;font-weight:100 900;font-display:optional;src:url('assets/fonts/fraunces-italic.woff2') format('woff2')}
-@font-face{font-family:'Fraunces';font-style:normal;font-weight:100 900;font-display:optional;src:url('assets/fonts/fraunces.woff2') format('woff2')}
-@font-face{font-family:'Newsreader';font-style:italic;font-weight:200 800;font-display:optional;src:url('assets/fonts/newsreader-italic.woff2') format('woff2')}
-@font-face{font-family:'Newsreader';font-style:normal;font-weight:200 800;font-display:optional;src:url('assets/fonts/newsreader.woff2') format('woff2')}
+/* Static Latin subsets of the variable fonts. First paint uses the metric-matched
+   fallbacks in index.html; these swap in without waiting on the full family. */
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:100 500;font-display:swap;src:url("assets/fonts/dm-sans-400.woff2") format("woff2")}
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:501 750;font-display:swap;src:url("assets/fonts/dm-sans-700.woff2") format("woff2")}
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:751 1000;font-display:swap;src:url("assets/fonts/dm-sans-800.woff2") format("woff2")}
+@font-face{font-family:Fraunces;font-style:normal;font-weight:100 900;font-display:swap;src:url("assets/fonts/fraunces-900.woff2") format("woff2")}
+@font-face{font-family:Newsreader;font-style:normal;font-weight:200 500;font-display:swap;src:url("assets/fonts/newsreader-400.woff2") format("woff2")}
+@font-face{font-family:Newsreader;font-style:normal;font-weight:501 800;font-display:swap;src:url("assets/fonts/newsreader-600.woff2") format("woff2")}

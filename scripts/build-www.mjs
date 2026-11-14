@@ -4,7 +4,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { VERSES } from "../verses.js";
 import { buildFeedOrder } from "../feed-rotation.js";
-import { todayCardHTML } from "../hero.js";
+import { postHTML } from "../feed-card.js";
 const root = new URL("../", import.meta.url);
 const www = new URL("../www/", import.meta.url);
 const site = JSON.parse(await readFile(new URL("../site.json", import.meta.url), "utf8"));
@@ -23,9 +23,9 @@ const publicConfig = {
 };
 const configJson = JSON.stringify(publicConfig).replace(/</g, "\\u003c");
 const todayVerse = buildFeedOrder(VERSES, { getItem: () => null, setItem() {} }, new Date()).order[0];
-const todayHtml = todayCardHTML(todayVerse, { source: "build" });
+const feedCard = postHTML(todayVerse, { prerender: true });
 function stamp(text, { html }) {
-  let out = text.replaceAll("__SITE_CONFIG__", configJson).replaceAll("__SITE_URL__", siteUrl).replaceAll("__TODAY_VERSE__", todayHtml);
+  let out = text.replaceAll("__SITE_CONFIG__", configJson).replaceAll("__SITE_URL__", siteUrl).replaceAll("__FEED_CARD__", feedCard);
   if (html && publicConfig.analyticsToken) {
     const beacon = `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":${JSON.stringify(publicConfig.analyticsToken)}}'></script>`;
     out = out.replace("</head>", `${beacon}\n</head>`);
@@ -37,7 +37,7 @@ try {
 } catch {}
 await mkdir(www, { recursive: true });
 const stamped = ["index.html", "privacy.html", "support.html", "app.js", "robots.txt", "sitemap.xml"];
-const copied = ["style.css", "fonts.css", "bible.js", "feed-rotation.js", "pull-refresh.js", "feasts.js", "streak.js", "plus.js", "verse-card.js", "verses.js", "hero.js", "plans.js", "reminders.js", "notes.js", "feast-links.js", "sw.js", "manifest.webmanifest", "og-image.png"];
+const copied = ["style.css", "fonts.css", "bible.js", "feed-rotation.js", "pull-refresh.js", "feasts.js", "streak.js", "plus.js", "verse-card.js", "verses.js", "hero.js", "plans.js", "reminders.js", "notes.js", "feast-links.js", "feed-card.js", "sw.js", "manifest.webmanifest", "og-image.png"];
 for (const f of stamped) {
   const text = await readFile(new URL(f, root), "utf8");
   if (!text.includes("__SITE_URL__") && (f.endsWith(".html") || f === "sitemap.xml" || f === "robots.txt")) {
