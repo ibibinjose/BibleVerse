@@ -143,16 +143,12 @@ function parseRef(q){
 }
 
 let searchTimer;
-async function runBibleSearch(rawQ) {
-  const metaEl = $("#bibleSearchMeta"), resultsEl = $("#bibleResults");
+async function collectHits(rawQ, limit) {
   const q = normQ(rawQ);
-  if (!q || q.length < 2) { metaEl.hidden = true; resultsEl.innerHTML = ""; return; }
-  metaEl.hidden = false; metaEl.textContent = `Searching all ${meta.totalVerses.toLocaleString()} verses…`;
+  if (!meta || !q || q.length < 2) return [];
   const all = await loadAllVerses();
-  if (normQ($("#bibleSearch").value) !== rawQ) return; // superseded
   const tokens = q.split(" ").filter(Boolean);
   const ref = parseRef(q);
-  const refText = ref && !ref.bookOnly && ref.chapter > 0 ? `${meta.books[ref.bookIdx].name} ${ref.chapter}${ref.verse > 0 ? `:${ref.verse}` : ""}` : "";
   const scored = [];
   for(const v of all){
     // Reference-first: exact chapter:verse and chapter matches rank highest.
@@ -170,8 +166,16 @@ async function runBibleSearch(rawQ) {
     if(ok) scored.push({ v, s });
   }
   scored.sort((a, b) => b.s - a.s || a.v.book - b.v.book || a.v.chapter - b.v.chapter || a.v.verse - b.v.verse);
-  const hits = scored.slice(0, 60).map(x => x.v);
-  const displayQ = (($("#bibleSearch").value || "").trim() || refText || q);
+  return scored.slice(0, limit).map(x => x.v);
+}
+async function runBibleSearch(rawQ) {
+  const metaEl = $("#bibleSearchMeta"), resultsEl = $("#bibleResults");
+  const q = normQ(rawQ);
+  if (!q || q.length < 2) { metaEl.hidden = true; resultsEl.innerHTML = ""; return; }
+  metaEl.hidden = false; metaEl.textContent = `Searching all ${meta.totalVerses.toLocaleString()} verses…`;
+  const hits = await collectHits(rawQ, 60);
+  if (normQ($("#bibleSearch").value) !== q) return;
+  const displayQ = ($("#bibleSearch").value || "").trim() || q;
   metaEl.textContent = hits.length ? `${hits.length}${hits.length === 60 ? "+" : ""} result${hits.length > 1 ? "s" : ""} for “${displayQ}” — tap to read` : `No verses found for “${displayQ}”. Try fewer words, another spelling, or a reference like John 1:1.`;
   resultsEl.innerHTML = hits.map((h) => `
     <button class="result-row" data-goto="${h.book}:${h.chapter}:${h.verse}">
@@ -256,5 +260,17 @@ export function initBible({ showToast } = {}) {
   window.addEventListener("online", () => { $("#bibleOfflinePill").textContent = "● Offline ready"; });
   window.addEventListener("offline", () => { $("#bibleOfflinePill").textContent = "● You're offline — Bible still works"; });
 
-  return { ensureLoaded, openChapter: async (b, c) => { await ensureLoaded(); return openChapter(b, c, true); } };
+  async function findVerses(rawQ) {
+    await ensureLoaded();
+    const hits = await collectHits(rawQ, 5);
+    if (!meta) return [];
+    return hits.map((h) => ({
+      book: h.book,
+      chapter: h.chapter,
+      verse: h.verse,
+      ref: `${meta.books[h.book].name} ${h.chapter}:${h.verse}`,
+      text: h.text.length > 140 ? h.text.slice(0, 140) + "…" : h.text,
+    }));
+  }
+  return { ensureLoaded, findVerses, openChapter: async (b, c) => { await ensureLoaded(); return openChapter(b, c, true); } };
 }

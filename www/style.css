@@ -125,7 +125,7 @@ input{font:inherit}
 .tab-dot{position:absolute;top:7px;right:12px;width:9px;height:9px;border-radius:50%;background:var(--ig-red);border:2px solid #fff}
 .tab-dot[hidden]{display:none}
 /* Feasts & Saints calendar */
-.season-card{margin:10px 16px 4px;border-radius:14px;padding:13px 14px;color:#fff;background:var(--season,#166534)}
+.season-card{margin:10px 16px 4px;border-radius:14px;padding:13px 14px;color:#fff;background:var(--season,#166534);border:0;font:inherit;text-align:left;width:calc(100% - 32px);cursor:pointer}
 .season-card small{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
 .season-card b{display:block;font-size:15px;margin:3px 0 2px}
 .season-card span{font-size:13px;opacity:.92;line-height:1.45;display:block}
@@ -147,6 +147,17 @@ input{font:inherit}
 .cal-day .dots i{width:5px;height:5px;border-radius:50%}
 .cal-day.today .dots i{box-shadow:0 0 0 1px #fff}
 .cal-legend{display:flex;gap:10px;justify-content:center;padding:4px 12px 0;font-size:10.5px;color:var(--ig-sub);flex-wrap:wrap}
+.cal-legend button{font:inherit;color:inherit;background:transparent;border:0;padding:4px 2px;cursor:pointer}
+.feast-row{font:inherit;cursor:pointer}
+#feastSheet{border:0;border-radius:18px;padding:22px 20px 18px;max-width:440px;width:calc(100% - 32px);color:#141311;background:#fff}
+#feastSheet::backdrop{background:rgba(0,0,0,.5)}
+#feastSheet h2{font-family:Fraunces,Georgia,serif;margin:8px 0 4px}
+#feastSheet h3{margin:16px 0 6px;font-size:14px}
+#feastSheet ul{margin:0;padding-left:18px}
+#feastSheet a{color:#0a4ea3}
+.sheet-note{color:#444;line-height:1.45}
+.sheet-season{font-weight:800}
+#feastSheet form{margin-top:16px}
 .cal-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
 .feast-list{padding:8px 16px 0;display:grid;gap:8px}
 .feast-row{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid #efefef;border-radius:12px;padding:10px 12px;text-align:left;width:100%;color:#000}
@@ -292,9 +303,24 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .reader-nav .ig-btn:disabled{opacity:.35}
 .tab[data-view="bible"] svg{width:27px;height:27px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-.view{animation:viewIn .22s ease}
+.view.is-entering{animation:viewIn .22s ease}
 @keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.view{animation:none}}
+@media(prefers-reduced-motion:reduce){.view.is-entering{animation:none}}
+.reflect{margin:12px 16px 8px;padding:22px 20px 18px;border-radius:22px;background:#1e3a2f;color:#f7f3ea}
+.reflect-kicker{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff4cc}
+.reflect-name{margin:0 0 12px;font-family:Fraunces,Georgia,serif;font-weight:900;font-size:clamp(32px,8vw,46px);line-height:.98;letter-spacing:-.03em;color:#fff8e8}
+.reflect-verse{margin:0;font-family:Newsreader,Georgia,serif;font-size:clamp(20px,5.2vw,26px);line-height:1.45}
+.reflect-ref{display:inline-block;margin-top:14px;font-weight:800}
+.reflect-prompt{margin:14px 0 0;line-height:1.5;color:#f3ead4}
+.note-label{display:grid;gap:6px;margin-top:16px;font-size:13px;font-weight:700}
+.verse-note{width:100%;min-height:78px;border:0;border-radius:12px;padding:10px 12px;font:inherit;background:rgba(255,255,255,.14);color:#fff}
+.reflect-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.plan-card{margin:0 16px 12px;padding:14px 14px 12px;border:1px solid #e7e5e4;border-radius:16px;background:#fff;color:#141311}
+.plan-card h3{margin:0 0 4px}
+.plan-locked{opacity:.8}
+.result-label{margin:18px 16px 6px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#57534e}
+.home-search{margin-top:12px}
+html[data-theme="dark"] .plan-card{background:#1c1a17;color:#f6f1e6;border-color:#2c2924}
 .streak-card{display:flex;align-items:center;width:calc(100% - 32px);margin:12px 16px 0;padding:12px 14px;border-radius:14px;background:#141311;color:#f6f1e6;font-weight:800;text-align:left;letter-spacing:-.01em}
 .streak-card::before{content:"✦";color:#f5c542;margin-right:10px}
 .profile-streak{margin:0 16px 12px;font-weight:800;color:#b45309}
